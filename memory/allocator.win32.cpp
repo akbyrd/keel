@@ -8,7 +8,7 @@
 #include "core/win32.hpp"
 #include "memory/allocator.hpp"
 
-namespace VirtualAllocatorInternal
+namespace AllocatorInternal
 {
 	static inline constexpr u32 magic            = 0xA11C'1111;
 	static inline constexpr u8  maxAlign         = 64;
@@ -18,6 +18,7 @@ namespace VirtualAllocatorInternal
 	struct Header
 	{
 		// TODO: struct TypeId? struct AllocTypeIndex?
+		// TODO: Rename
 		u32 magic;
 		u8  headerOffset;
 		u8  userOffset;
@@ -27,15 +28,20 @@ namespace VirtualAllocatorInternal
 
 	static Header& getHeader(Allocation& allocation)
 	{
-		// TODO: Not sure this works for arbitrary padding?
 		assert(allocation.bytes.data);
 		i64 userAddr   = i64(allocation.bytes.data);
-		i64 headerAddr = roundDown(userAddr - sizeof(Header), alignof(Header));
+		i64 headerAddr = roundDown<i64>(userAddr - sizeof(Header), alignof(Header));
 
 		Header& header = *reinterpret_cast<Header*>(headerAddr);
 		assert(header.magic == magic);
 		return header;
 	}
+}
+
+constinit Allocator
+VirtualAllocator::interface = Allocator {
+	.alloc = alloc,
+	.free  = free,
 };
 
 b8
@@ -43,7 +49,7 @@ VirtualAllocator::init()
 {
 	using namespace VirtualAllocatorInternal;
 
-	// TODO: Replace is isImplicitLifetime
+	// TODO: Replace with isImplicitLifetime
 	static_assert(isAggregate<Header>);
 	static_assert(isTriviallyConstructible<Header>);
 	static_assert(isTriviallyDestructible<Header>);
@@ -80,7 +86,7 @@ VirtualAllocator::alloc(i64 size, u8 align)
 Allocation
 VirtualAllocator::alloc(i64 reserve, i64 commit, u8 align)
 {
-	// Layout: [Alignment | Header | Data]
+	// Layout: [Slack | Header | Data]
 
 	using namespace VirtualAllocatorInternal;
 

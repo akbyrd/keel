@@ -1,20 +1,28 @@
-# Fundamental Pieces
-* Allocators  - A type the describes how allocations should be performed. No knowledge of objects and their lifetimes.
-* Allocations - A specific allocation made by a specific allocator. Raw bytes. Remembers which allocator it came from.
-* Arenas      - A higher level API that manages object lifetimes. Uses an allocator internally.
+TODO: Split into "docs" and "notes"
 
-Programs are expected to work with Arenas the majority of the time. Arenas are passed to any function that needs to allocate space for their results.
+# Overview
+
+Fundamental pieces
+* Allocator  - A type that describes how allocations should be performed. Has no knowledge of objects and their lifetimes.
+* Allocation - An allocation made by am allocator. Raw bytes. Remembers which allocator it came from.
+* Container  - A higher level type that manages object lifetimes. Uses an allocator internally.
+* Object     - An individual object made by a container.
+
+This splits things into two categories: one that deals with raw memory (allocators and allocations) and one that deals with objects (containers and objects). Programs are expected to work with containers (namely, arenas) the majority of the time. Important lifetimes are generally expected to have a container associated with them and all operations within that lifetime share the the container. Containers can be nested within one another when strict sub-lifetimes are needed. Stack-based, thread-local scratch arenas are provided automatically and can be used for short lived, temporary allocations. Containers are passed to any function that needs to allocate space for its results.
+
+TODO: Is memory zeroed?
+TODO: Thread safety
 
 
 
 # Allocators
-Allocators allocate and free raw memory from the platform. They do not deal with object lifetimes, meaning they do not call constructors or destructors. Allocations are intended to be exposed through higher level APIs such as arenas, and those higher level APIs are responsible for managing object lifetimes. This allows allocators to have minimal overhead and to be reused by different higher level APIs as needed. Allocations are expected to be large and used for many objects. Allocations store additional metadata which is small, but may cause an additional page to be allocated.
+Allocators allocate and free raw memory from the platform. They do not deal with object lifetimes, meaning they do not call constructors or destructors. Allocations are intended to be exposed through higher level APIs such as arenas, and those higher level APIs are responsible for managing object lifetimes. This allows allocators to have minimal overhead and to be reused by different higher level APIs as needed. Allocations are expected to be large and used for many objects. Allocations store additional metadata which is small (~24 bytes), but may cause an additional page to be allocated.
 
 
 ## Requirements
 * Must be swappable. Allocators are an abstraction and allow users to select which specific allocator is used without affecting code that uses the allocator.
 * Must support user allocators. Users should be able to implement custom allocators that conform to the abstraction and replace the default allocator.
-* Must be able to wrap allocators. A basic allocator should be able to be wrapped with debug functionality without needing to duplicate the allocation behavior. For example, a platform virtual allocator should be able to be wrapped a leak check allocator in a way that composes these two behaviors without duplicating them. There may be special cases where this is not possible. A wrapper that detects underflow
+* Must be able to wrap allocators. A basic allocator should be able to be wrapped with debug functionality without needing to duplicate the allocation behavior. For example, a platform virtual allocator should be able to be wrapped with a leak check allocator in a way that composes these two behaviors without duplicating them. There may be special cases where this is not possible.
 * An allocation is a specific type, not a raw pointer. This avoids ambiguity (i.e. "is this pointer an allocation?").
 * Allocators are not part of the type of the types that use them (i.e. containers are not templated on the type of allocator they use).
 * Allocators are intrinsically thread-safe and do not perform synchronization between threads. Any state must be stored within allocations themselves or in thread-local storage.
@@ -24,12 +32,48 @@ Allocators allocate and free raw memory from the platform. They do not deal with
 * Allocations may return more memory than requested (but not less).
 
 
+## Composition
+TODO: Describe
+```cpp
+// Con: Doesn't say which allocator to wrap
+Allocation alloc = DebugAllocator::alloc(1 * Megabyte, 8);
+```
+```cpp
+// Con: Doesn't support unique allocators
+Allocator inner = VirtualAllocator::interface;
+Allocation alloc = DebugAllocator::alloc(inner, 1 * Megabyte, 8);
+```
+```cpp
+// Pro: Can specialize for unique allocators / interactions
+// Con: Simpler to just take the allocator as a parameter - that's what it resolves to internally anyway
+// Con: Forces inner allocators header to be defined in a header (functions are defined in header and need to use the header struct)
+Allocation alloc = DebugAllocator<VirtualAllocator>::alloc(1 * Megabyte, 8);
+```
+```cpp
+// Con: Trickier to allow specialization
+// Con: Not sure there's any advantage
+using DebugAllocator = ComposedAllocator<VirtualAllocator, FillAllocator>;
+```
+
+
 ## Types
 TODO: Document
+TODO: In-line vs out-of-line metadata variants for arenas?
+
+### Leak Check Allocator
+Metadata could be stored in a header as part of the allocation or in a separate allocation.
+* Separate allocation
+	* Shared between user allocations
+	* Could be thread-local. If so, have to deal with alloc on one thread and free on another. Or disallow this and detect it.
 
 
 ## Metadata
-Each allocator may have different needs for metadata.
+
+### Requirements
+* No metadata is stored in the Allocation struct.
+* Different allocators support different metadata.
+* Concrete, non-wrapped allocators load metadata with a single non-dependent load.
+* Metadata can be extended when wrapping an allocator.
 
 ### Possible Implementations
 
@@ -59,7 +103,15 @@ Return an opaque struct.
 
 ## Other Notes
 
+### Design axes
+* Where the memory comes from - virtual, stack
+* How the memory is allocated - no reserve, reserve and manual commit, reserve and automatic commit
+* How objects are allocated   - stack, fixed size bins, free list, occupancy list
+
+The first two are the purview of memory allocators. The last is determined by the object allocator.
+
 ### Realloc vs extend
+TODO: Update this section. No longer true? Would it be on allocators or containers?
 A realloc operation does not exist for allocators. Instead, an extend operation is provided. Reallocating requires knowledge of objects in order to relocate, which allocators do not have. This means realloc is a container operation, not an allocator operation. Extend is a failable operation that attempts to grow the allocation in-place. When it fails the container can perform an alloc-relocate-free sequence.
 
 
@@ -71,9 +123,14 @@ A realloc operation does not exist for allocators. Instead, an extend operation 
 * Invalid   - 0xCC
 
 ### Implementations
+* Stack tracing
 * Leak check
-* Use-after pop check
-* Grow check
+* Double free
+* Use after free
+* Overflow
+* Underflow
+* Thread check
+* Fill bytes
 
 
 ## C++ Minutiae
