@@ -43,6 +43,15 @@ struct VirtualAllocator
 	static Allocation& free   (Allocation& allocation);
 };
 
+struct LeakCheckAllocator
+{
+	static constinit Allocator interface;
+
+	static b8          init  ();
+	static Allocation  alloc (i64 size, u8 align);
+	static Allocation& free  (Allocation& allocation);
+};
+
 // -------------------------------------------------------------------------------------------------
 // Implementation
 
