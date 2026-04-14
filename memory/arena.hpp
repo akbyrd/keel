@@ -138,7 +138,7 @@ Arena::push(NoInit)
 
 		if (!lastMeta || lastMeta->id != id<T>)
 		{
-			Meta& meta = push(NoInit {});
+			Meta& meta = push<Meta>(NoInit {});
 			u8* dst = alignUp<T>(alloc.bytes.data + alloc.bytes.len);
 
 			new (&meta) Meta {
