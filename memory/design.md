@@ -1,4 +1,4 @@
-TODO: Split into "docs" and "notes"
+TODO: Split into docs ("what") and notes ("why")
 
 # Overview
 

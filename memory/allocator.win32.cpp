@@ -10,7 +10,7 @@
 
 namespace AllocatorInternal
 {
-	static inline constexpr u32 magic            = 0xA11C'1111;
+	static inline constexpr u16 id               = 0xA11C;
 	static inline constexpr u8  maxAlign         = 64;
 	static inline constinit u32 pageSize         = 0;
 	static inline constinit u32 allocGranularity = 0;
@@ -19,7 +19,7 @@ namespace AllocatorInternal
 	{
 		// TODO: struct TypeId? struct AllocTypeIndex?
 		// TODO: Rename
-		u32 magic;
+		u16 id;
 		u8  headerOffset;
 		u8  userOffset;
 		i64 committed;
@@ -33,21 +33,15 @@ namespace AllocatorInternal
 		i64 headerAddr = roundDown<i64>(userAddr - sizeof(Header), alignof(Header));
 
 		Header& header = *reinterpret_cast<Header*>(headerAddr);
-		assert(header.magic == magic);
+		assert(header.id == id);
 		return header;
 	}
 }
 
-constinit Allocator
-VirtualAllocator::interface = Allocator {
-	.alloc = alloc,
-	.free  = free,
-};
-
 b8
 VirtualAllocator::init()
 {
-	using namespace VirtualAllocatorInternal;
+	using namespace AllocatorInternal;
 
 	// TODO: Replace with isImplicitLifetime
 	static_assert(isAggregate<Header>);
@@ -88,7 +82,7 @@ VirtualAllocator::alloc(i64 reserve, i64 commit, u8 align)
 {
 	// Layout: [Slack | Header | Data]
 
-	using namespace VirtualAllocatorInternal;
+	using namespace AllocatorInternal;
 
 	assert(isPowerOf2(align));
 	assert(align <= maxAlign);
@@ -124,7 +118,7 @@ VirtualAllocator::alloc(i64 reserve, i64 commit, u8 align)
 	u8* allocBytes = static_cast<u8*>(allocData);
 	auto& header = *new (allocBytes + headerOffset) Header {};
 	header = Header {
-		.magic        = magic,
+		.id           = id,
 		.headerOffset = u8(headerOffset),
 		.userOffset   = u8(userOffset),
 		.committed    = commit,
@@ -139,7 +133,7 @@ VirtualAllocator::alloc(i64 reserve, i64 commit, u8 align)
 Allocation&
 VirtualAllocator::free(Allocation& allocation)
 {
-	using namespace VirtualAllocatorInternal;
+	using namespace AllocatorInternal;
 
 	Header& header = getHeader(allocation);
 	void* allocData = reinterpret_cast<u8*>(&header) - header.headerOffset;
@@ -152,7 +146,7 @@ VirtualAllocator::free(Allocation& allocation)
 Allocation&
 VirtualAllocator::commit(Allocation& allocation, i64 size)
 {
-	using namespace VirtualAllocatorInternal;
+	using namespace AllocatorInternal;
 
 	Header& header = getHeader(allocation);
 	size = roundUp<i64>(header.userOffset + size, pageSize);
