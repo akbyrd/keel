@@ -36,6 +36,37 @@ namespace AllocatorInternal
 		assert(header.id == id);
 		return header;
 	}
+
+	static LONG CALLBACK onGuardPageAccess(EXCEPTION_POINTERS* ep)
+	{
+		if (ep->ExceptionRecord->ExceptionCode != EXCEPTION_GUARD_PAGE)
+			return EXCEPTION_CONTINUE_SEARCH;
+
+		// TODO: Clean this up
+		u8* faultAddr = reinterpret_cast<u8*>(ep->ExceptionRecord->ExceptionInformation[1]);
+		faultAddr = (u8*) roundDown<i64>(i64(faultAddr), pageSize);
+
+		u8** headerAddr = reinterpret_cast<u8**>(faultAddr);
+		Header& header = *reinterpret_cast<Header*>(*headerAddr);
+		assert(header.id == id);
+
+		header.committed += pageSize;
+		if (header.reserved > header.committed)
+		{
+			// TODO: Clean this up
+			// NOTE: The guard page triggers onGuardPageAccess which commits it and advances the guard
+			u8* guardBytes = static_cast<u8*>(faultAddr + pageSize);
+			u8** headerPtr = reinterpret_cast<u8**>(guardBytes); // TODO: Rename
+			void* guard = VirtualAlloc(guardBytes, pageSize, MEM_COMMIT, PAGE_READWRITE);
+			assertWin32(guard);
+
+			*headerPtr = *headerAddr;
+			guard = VirtualAlloc(guardBytes, pageSize, MEM_COMMIT, PAGE_GUARD | PAGE_READWRITE);
+			assertWin32(guard);
+		}
+
+		return EXCEPTION_CONTINUE_EXECUTION;
+	}
 }
 
 b8
@@ -68,6 +99,7 @@ VirtualAllocator::init()
 		return false;
 	}
 
+	AddVectoredExceptionHandler(1, onGuardPageAccess);
 	return true;
 }
 
@@ -100,24 +132,61 @@ VirtualAllocator::alloc(i64 reserve, i64 commit, u8 align)
 
 	// NOTE: Memory is guaranteed to be zeroed
 	// NOTE: When no address is specified size is rounded up to a multiple of page size
-	void* allocData = nullptr;
-	if (reserve > commit)
+
+	u8* allocBytes = nullptr;
+	u8* headerBytes = nullptr;
+	Allocation allocation = {};
+
+	// Case 1 - Commit all
+	if (reserve == commit)
 	{
-		allocData = VirtualAlloc(nullptr, reserve, MEM_RESERVE, PAGE_NOACCESS);
+		void* allocData = VirtualAlloc(nullptr, commit, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
 		assertWin32(allocData);
 
-		allocData = VirtualAlloc(allocData, commit, MEM_COMMIT, PAGE_READWRITE);
-		assertWin32(allocData);
+		allocBytes = static_cast<u8*>(allocData);
+		headerBytes = allocBytes + headerOffset;
+		allocation = Allocation { .bytes { commit - userOffset, allocBytes + userOffset } };
 	}
 	else
 	{
-		allocData = VirtualAlloc(nullptr, commit, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
-		assertWin32(allocData);
+		constexpr bool autoCommit = true;
+
+		// Case 2 - Reserve + manual commit
+		if constexpr (!autoCommit)
+		{
+			void* allocData = VirtualAlloc(nullptr, reserve, MEM_RESERVE, PAGE_NOACCESS);
+			assertWin32(allocData);
+
+			allocBytes = static_cast<u8*>(allocData);
+			headerBytes = allocBytes + headerOffset;
+			allocation = Allocation { .bytes { commit - userOffset, allocBytes + userOffset } };
+
+			allocData = VirtualAlloc(allocData, commit, MEM_COMMIT, PAGE_READWRITE);
+			assertWin32(allocData);
+		}
+		// Case 3 = Reserve + automatic commit
+		else
+		{
+			void* allocData = VirtualAlloc(nullptr, reserve, MEM_RESERVE, PAGE_NOACCESS);
+			assertWin32(allocData);
+
+			allocBytes = static_cast<u8*>(allocData);
+			headerBytes = allocBytes + headerOffset;
+			allocation = Allocation { .bytes { reserve - userOffset, allocBytes + userOffset } };
+
+			allocData = VirtualAlloc(allocData, commit + pageSize, MEM_COMMIT, PAGE_READWRITE);
+			assertWin32(allocData);
+
+			void* guardData = allocBytes + commit;
+			u8** headerPtr = static_cast<u8**>(guardData);
+			*headerPtr = headerBytes;
+
+			guardData = VirtualAlloc(guardData, pageSize, MEM_COMMIT, PAGE_GUARD | PAGE_READWRITE);
+			assertWin32(guardData);
+		}
 	}
 
-	u8* allocBytes = static_cast<u8*>(allocData);
-	auto& header = *new (allocBytes + headerOffset) Header {};
-	header = Header {
+	*new (headerBytes) Header {
 		.id           = id,
 		.headerOffset = u8(headerOffset),
 		.userOffset   = u8(userOffset),
@@ -125,9 +194,7 @@ VirtualAllocator::alloc(i64 reserve, i64 commit, u8 align)
 		.reserved     = reserve,
 	};
 
-	return Allocation {
-		.bytes = { commit - userOffset, allocBytes + userOffset },
-	};
+	return allocation;
 }
 
 Allocation&
