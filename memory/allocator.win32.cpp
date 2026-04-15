@@ -39,33 +39,28 @@ namespace AllocatorInternal
 
 	static LONG CALLBACK onGuardPageAccess(EXCEPTION_POINTERS* ep)
 	{
-		if (ep->ExceptionRecord->ExceptionCode != EXCEPTION_GUARD_PAGE)
-			return EXCEPTION_CONTINUE_SEARCH;
-
-		// TODO: Clean this up
-		u8* faultAddr = reinterpret_cast<u8*>(ep->ExceptionRecord->ExceptionInformation[1]);
-		faultAddr = (u8*) roundDown<i64>(i64(faultAddr), pageSize);
-
-		u8** headerAddr = reinterpret_cast<u8**>(faultAddr);
-		Header& header = *reinterpret_cast<Header*>(*headerAddr);
-		assert(header.id == id);
-
-		header.committed += pageSize;
-		if (header.reserved > header.committed)
+		switch (ep->ExceptionRecord->ExceptionCode)
 		{
-			// TODO: Clean this up
-			// NOTE: The guard page triggers onGuardPageAccess which commits it and advances the guard
-			u8* guardBytes = static_cast<u8*>(faultAddr + pageSize);
-			u8** headerPtr = reinterpret_cast<u8**>(guardBytes); // TODO: Rename
-			void* guard = VirtualAlloc(guardBytes, pageSize, MEM_COMMIT, PAGE_READWRITE);
-			assertWin32(guard);
+			default: return EXCEPTION_CONTINUE_SEARCH;
 
-			*headerPtr = *headerAddr;
-			guard = VirtualAlloc(guardBytes, pageSize, MEM_COMMIT, PAGE_GUARD | PAGE_READWRITE);
-			assertWin32(guard);
+			case EXCEPTION_GUARD_PAGE:
+			{
+				u8* faultAddr = reinterpret_cast<u8*>(ep->ExceptionRecord->ExceptionInformation[1]); // TODO: Is there a constant for this?
+
+				MEMORY_BASIC_INFORMATION mbi = {};
+				i64 written = VirtualQuery(faultAddr, &mbi, sizeof(mbi));
+				assertWin32(written);
+
+				Header& header = *reinterpret_cast<Header*>(mbi.AllocationBase); // TODO: Not always correct
+				assert(header.id == id);
+				header.committed += pageSize;
+
+				void* pageData = VirtualAlloc(faultAddr, 1, MEM_COMMIT, PAGE_READWRITE);
+				assertWin32(pageData);
+
+				return EXCEPTION_CONTINUE_EXECUTION;
+			}
 		}
-
-		return EXCEPTION_CONTINUE_EXECUTION;
 	}
 }
 
@@ -99,7 +94,13 @@ VirtualAllocator::init()
 		return false;
 	}
 
-	AddVectoredExceptionHandler(1, onGuardPageAccess);
+	void* result = AddVectoredExceptionHandler(1, onGuardPageAccess);
+	if (!result)
+	{
+		// TODO: logging
+		return false;
+	}
+
 	return true;
 }
 
@@ -133,58 +134,31 @@ VirtualAllocator::alloc(i64 reserve, i64 commit, u8 align)
 	// NOTE: Memory is guaranteed to be zeroed
 	// NOTE: When no address is specified size is rounded up to a multiple of page size
 
-	u8* allocBytes = nullptr;
-	u8* headerBytes = nullptr;
-	Allocation allocation = {};
-
 	// Case 1 - Commit all
+	// Case 2 - Reserve + manual commit
+	// Case 3 = Reserve + automatic commit
+	constexpr bool autoCommit = true;
+	u32 protectFlags = autoCommit ? PAGE_GUARD | PAGE_READWRITE : PAGE_NOACCESS;
+	i64 usableSize = autoCommit ? reserve : commit;
+
+	void* allocData = nullptr;
 	if (reserve == commit)
 	{
-		void* allocData = VirtualAlloc(nullptr, commit, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+		allocData = VirtualAlloc(nullptr, commit, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
 		assertWin32(allocData);
-
-		allocBytes = static_cast<u8*>(allocData);
-		headerBytes = allocBytes + headerOffset;
-		allocation = Allocation { .bytes { commit - userOffset, allocBytes + userOffset } };
 	}
 	else
 	{
-		constexpr bool autoCommit = true;
+		//allocData = VirtualAlloc(nullptr, reserve, MEM_RESERVE, protectFlags);
+		allocData = VirtualAlloc(nullptr, reserve, MEM_RESERVE, PAGE_GUARD | PAGE_READWRITE);
+		assertWin32(allocData);
 
-		// Case 2 - Reserve + manual commit
-		if constexpr (!autoCommit)
-		{
-			void* allocData = VirtualAlloc(nullptr, reserve, MEM_RESERVE, PAGE_NOACCESS);
-			assertWin32(allocData);
-
-			allocBytes = static_cast<u8*>(allocData);
-			headerBytes = allocBytes + headerOffset;
-			allocation = Allocation { .bytes { commit - userOffset, allocBytes + userOffset } };
-
-			allocData = VirtualAlloc(allocData, commit, MEM_COMMIT, PAGE_READWRITE);
-			assertWin32(allocData);
-		}
-		// Case 3 = Reserve + automatic commit
-		else
-		{
-			void* allocData = VirtualAlloc(nullptr, reserve, MEM_RESERVE, PAGE_NOACCESS);
-			assertWin32(allocData);
-
-			allocBytes = static_cast<u8*>(allocData);
-			headerBytes = allocBytes + headerOffset;
-			allocation = Allocation { .bytes { reserve - userOffset, allocBytes + userOffset } };
-
-			allocData = VirtualAlloc(allocData, commit + pageSize, MEM_COMMIT, PAGE_READWRITE);
-			assertWin32(allocData);
-
-			void* guardData = allocBytes + commit;
-			u8** headerPtr = static_cast<u8**>(guardData);
-			*headerPtr = headerBytes;
-
-			guardData = VirtualAlloc(guardData, pageSize, MEM_COMMIT, PAGE_GUARD | PAGE_READWRITE);
-			assertWin32(guardData);
-		}
+		allocData = VirtualAlloc(allocData, commit, MEM_COMMIT, PAGE_READWRITE);
+		assertWin32(allocData);
 	}
+
+	u8* allocBytes = static_cast<u8*>(allocData);
+	u8* headerBytes = allocBytes + headerOffset;
 
 	*new (headerBytes) Header {
 		.id           = id,
@@ -194,7 +168,9 @@ VirtualAllocator::alloc(i64 reserve, i64 commit, u8 align)
 		.reserved     = reserve,
 	};
 
-	return allocation;
+	return Allocation {
+		.bytes { usableSize - userOffset, allocBytes + userOffset }
+	};
 }
 
 Allocation&
