@@ -2,6 +2,7 @@
 
 #include "containers/span.hpp"
 #include "core/traits.hpp"
+#include "memory/bytes.hpp"
 
 // -------------------------------------------------------------------------------------------------
 // Interface
@@ -56,7 +57,7 @@ constexpr void copyAssign(Span<T> dst, Span<const T> src)
 {
 	if constexpr (isTriviallyCopyAssignable<T>)
 	{
-		copyBytes(dst.data, src.data, src.len);
+		copyBytes(dst.asBytes(), src.asBytes());
 	}
 	else
 	{
@@ -74,7 +75,7 @@ constexpr void moveAssign(Span<T> dst, Span<T> src)
 {
 	if constexpr (isTriviallyMoveAssignable<T>)
 	{
-		moveBytes(dst.data, src.data, src.len);
+		moveBytes(dst.asBytes(), src.asBytes());
 	}
 	else
 	{
@@ -116,8 +117,7 @@ copyConstruct(Span<T> dst, Span<const T> src)
 {
 	if constexpr (isTriviallyCopyConstructible<T>)
 	{
-		copyBytes(dst.data, src.data, src.len);
-		new (dst.data) T[src.len];
+		copyBytes(dst.asBytes(), src.asBytes());
 	}
 	else
 	{
@@ -147,12 +147,12 @@ moveConstruct(Span<T> dst, Span<T> src)
 {
 	if constexpr (isTriviallyMoveConstructible<T>)
 	{
-		copyBytes(dst.data, src.data, src.len);
-		new (dst.data) T[src.len];
+		copyBytes(dst.asBytes(), src.asBytes());
 	}
 	else
 	{
 		assert(!dst.overlaps(src));
+
 		for (i64 i = 0; i < src.len; ++i)
 			// TODO: move or forward?
 			new (&dst.data[i]) T { move(src.data[i]) };
@@ -163,7 +163,11 @@ template <typename T>
 constexpr void
 destruct(Span<T> dst)
 {
-	if constexpr (!isTriviallyDestructible<T>)
+	if constexpr (isTriviallyDestructible<T>)
+	{
+		// Nothing to do
+	}
+	else
 	{
 		for (T& x : dst)
 			x.~T();

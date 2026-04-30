@@ -9,7 +9,7 @@ template <typename T> constexpr Span<u8> toBytes(T& x);
 
 constexpr void clearBytes (Span<u8> dst);
 constexpr void fillBytes  (Span<u8> dst, u8 src);
-constexpr void copyBytes  (Span<u8> dst, Span<u8> src);
+constexpr void copyBytes  (Span<u8> dst, Span<const u8> src);
 constexpr void moveBytes  (Span<u8> dst, Span<u8> src);
 
 // -------------------------------------------------------------------------------------------------

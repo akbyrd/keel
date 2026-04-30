@@ -19,8 +19,6 @@ using f64  = double;
 
 using b8   = bool;
 using c8   = char;
-using uptr = u64;
-//using size = size_t;
 
 // -------------------------------------------------------------------------------------------------
 // Tests
@@ -45,4 +43,3 @@ static_assert(sizeof(b8) == 1);
 static_assert(sizeof(c8) == 1);
 static_assert(isUnsigned<c8>);
 static_assert(CHAR_BIT == 8);
-static_assert(sizeof(uptr) == sizeof(void*));

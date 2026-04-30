@@ -45,7 +45,7 @@ fillBytes(Span<u8> dst, u8 src)
 }
 
 constexpr void
-copyBytes(Span<u8> dst, Span<u8> src)
+copyBytes(Span<u8> dst, Span<const u8> src)
 {
 	assert(dst.len >= src.len);
 	assert(!dst.overlaps(src));

@@ -53,7 +53,7 @@ struct Span
 
 	constexpr bool overlaps(Span<const T> x) const;
 
-	constexpr Span<u8> asBytes();
+	constexpr Span<u8> asBytes() requires (!isConst<T>);
 	constexpr Span<const u8> asBytes() const;
 
 	template <typename U>
@@ -257,15 +257,16 @@ Span<T>::overlaps(Span<const T> x) const
 template <typename T>
 constexpr Span<u8>
 Span<T>::asBytes()
+	requires (!isConst<T>)
 {
-	return { len * sizeof(T), reinterpret_cast<u8*>(data) };
+	return { len * i64(sizeof(T)), reinterpret_cast<u8*>(data) };
 }
 
 template <typename T>
 constexpr Span<const u8>
 Span<T>::asBytes() const
 {
-	return { len * sizeof(T), reinterpret_cast<const u8*>(data) };
+	return { len * i64(sizeof(T)), reinterpret_cast<const u8*>(data) };
 }
 
 template <typename T>

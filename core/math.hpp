@@ -32,6 +32,10 @@ template <typename T> requires (isArithmetic<T>)    constexpr T minVal;
 template <typename T> requires (isArithmetic<T>)    constexpr T maxVal;
 template <typename T> requires (isFloatingPoint<T>) constexpr T smallestVal;
 
+template <typename T> requires (isFloatingPoint<T>) constexpr T pi;
+template <typename T> requires (isFloatingPoint<T>) constexpr T tau;
+template <typename T> requires (isFloatingPoint<T>) constexpr T goldenRatio;
+
 // -------------------------------------------------------------------------------------------------
 // Implementation
 
@@ -108,6 +112,7 @@ constexpr T max(T x, T y)
 	return x > y ? x : y;
 }
 
+// TODO: Try removing this overload
 // NOTE: aligning up may overflow
 template <typename T>
 constexpr u8* alignUp(u8* x)
@@ -116,8 +121,7 @@ constexpr u8* alignUp(u8* x)
 	constexpr u64 align = alignof(T);
 	static_assert(isPowerOf2(align));
 
-	uptr xp = uptr(x);
-	u8* result = (xp + align - 1) & ~(align - 1);
+	u8* result = x + (-u64(x) & (align - 1));
 	return result;
 }
 
@@ -136,7 +140,7 @@ constexpr u8* alignDown(u8* x)
 	constexpr u64 align = alignof(T);
 	static_assert(isPowerOf2(align));
 
-	u8* result = reinterpret_cast<u8*>(uptr(x) & ~(align - 1));
+	u8* result = reinterpret_cast<u8*>(u64(x) & ~(align - 1));
 	return result;
 }
 
@@ -174,6 +178,13 @@ template <> constexpr c8  maxVal<c8>  = isSigned<c8> ? 0x7F : 0xFF;
 // TODO: Consider a "make float" function
 template <> constexpr f32 smallestVal<f32> = 0x0080'0000;
 template <> constexpr f64 smallestVal<f64> = 0x0010'0000'0000'0000;
+
+template <> constexpr f32 pi<f32>          = 3.14159265358979323f;
+template <> constexpr f64 pi<f64>          = 3.14159265358979323;
+template <> constexpr f32 tau<f32>         = 6.28318530717958647f;
+template <> constexpr f64 tau<f64>         = 6.28318530717958647;
+template <> constexpr f32 goldenRatio<f32> = 1.61803398874989484f;
+template <> constexpr f64 goldenRatio<f64> = 1.61803398874989484;
 
 #include "core/math.win32.hpp" // IWYU pragma: export
 
