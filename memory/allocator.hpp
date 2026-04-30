@@ -15,6 +15,7 @@ constexpr u64 Terabyte = 1024 * Gigabyte;
 struct Allocation
 {
 	Span<u8> bytes;
+	i64      reserved;
 };
 
 struct VirtualAllocator

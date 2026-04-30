@@ -124,7 +124,8 @@ VirtualAllocator::reserve(i64 reserve, i64 commit, u8 align)
 	};
 
 	return Allocation {
-		.bytes = { commit - userOffset, allocBytes + userOffset },
+		.bytes    = { commit - userOffset, allocBytes + userOffset },
+		.reserved = reserve - userOffset,
 	};
 }
 
@@ -159,7 +160,7 @@ VirtualAllocator::free(Allocation& alloc)
 	void* allocData = reinterpret_cast<u8*>(&header) - header.headerOffset;
 	b8 result = VirtualFree(allocData, 0, MEM_RELEASE);
 	assertWin32(result);
-	alloc = move(Allocation {});
+	alloc = {};
 	return alloc;
 }
 

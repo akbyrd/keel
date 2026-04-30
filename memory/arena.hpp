@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core/math.hpp"
 #include "core/meta.hpp"
 #include "memory/allocator.hpp"
 #include "memory/lifetime.hpp"
@@ -11,47 +12,35 @@
 // TODO: Rename?
 struct NoInit {};
 
-// TODO: Design
-// Don't replicate allocator interface
-// Store allocator in Arena or allocation?
-
-// TODO: Can we nest arenas?
-// How do we ensure children end their lifetime before parents?
-// Do arenas need to track their parent? (Debug only?)
-
-// TODO: Maybe arrays are a special case of arenas?
-
-#if false
 struct Arena
 {
 	struct Meta;
 
-	Span<u8> alloc    = {};
-	Meta*    lastMeta = nullptr;
+	Allocation alloc;
+	i64        used;
+	Meta*      lastMeta;
 
-	Arena() = default; // TODO: Does this zero?
+	Arena() = default;
 	~Arena();
 
-	Arena(Span<const c8> name, i64 bytes, Allocator allocator);
-	Arena(Span<const c8> name, i64 reserve, i64 commit, Allocator allocator);
+	Arena(Span<const c8> name, Allocation alloc);
 
 	Arena(const Arena&) = delete;
 	Arena& operator=(const Arena&) = delete;
 
-	// TODO: Move is probably ok
-	Arena(Arena&&) = delete;
-	Arena& operator=(Arena&&) = delete;
+	Arena(Arena&&);
+	Arena& operator=(Arena&&);
 
-	// TODO: I don't think any of this can be constexpr
 	template <typename T>                   constexpr T&      push      ();
 	template <typename T>                   constexpr T&      push      (NoInit);
 	template <typename T>                   constexpr T&      push      (T&& value);
 	template <typename T, typename ...Args> constexpr T&      push      (Args&& ...args);
 
-	template <typename T>                   constexpr Span<T> pushArray (i64 count);
-	template <typename T>                   constexpr Span<T> pushArray (i64 count, NoInit);
-	template <typename T>                   constexpr Span<T> pushArray (i64 count, T&& value);
-	template <typename T, typename ...Args> constexpr Span<T> pushArray (i64 count, Args&& ...args);
+	//template <typename T>                   constexpr Span<T> pushArray (i64 count);
+	//template <typename T>                   constexpr Span<T> pushArray (i64 count, NoInit);
+	//template <typename T>                   constexpr Span<T> pushArray (i64 count, T&& value);
+	//template <typename T, typename ...Args> constexpr Span<T> pushArray (i64 count, Args&& ...args);
+	//template <typename T, typename ...Args> constexpr Span<T> pushArray (i64 count, Span<const T> value);
 
 	// TODO: scope
 	// TODO: overhead (arena, allocator, total)
@@ -69,24 +58,20 @@ struct Arena::Meta
 	i64   count;
 	Meta* prevMeta;
 
-	using DestructFn = void(void*);
+	using DestructFn = void(Span<u8>);
 	DestructFn* destruct;
 };
 
-static_assert(isTriviallyConstructible<Arena::Meta>);
-static_assert(isTriviallyDestructible<Arena::Meta>);
-static_assert(isTriviallyCopyable<Arena::Meta>);
-
-// TODO: Maybe name should be handed to the allocator?
-Arena::Arena(Span<const c8> name, i64 bytes, Allocator allocator)
-	: Arena(name, bytes, bytes, allocator)
-{}
-
-Arena::Arena(Span<const c8> name, i64 reserve, i64 commit, Allocator allocator)
-	: alloc(allocator.alloc(reserve, commit))
+Arena::Arena(Span<const c8> name, Allocation alloc)
+	: alloc(move(alloc))
+	, used(0)
+	, lastMeta(nullptr)
 {
-	Span<c8> nameCopy = pushArray<c8>(name.len);
-	copyConstruct(nameCopy, name);
+	(void) name;
+
+	// TODO: Implement
+	//Span<c8> nameCopy = pushArray<c8>(name.len);
+	//copyConstruct(nameCopy, name);
 }
 
 Arena::~Arena()
@@ -95,15 +80,28 @@ Arena::~Arena()
 	{
 		const Meta& meta = *lastMeta;
 
-		u8* objects = alloc.bytes.data + meta.offset;
-		for (i64 i = meta.count - 1; i >= 0; --i)
-		{
-			u8* object = objects + i * meta.size;
-			meta.destruct(object);
-		}
+		// TODO: Does the order of destruction matter?
+		Span<u8> objects = { meta.count * meta.size, alloc.bytes.data + meta.offset };
+		meta.destruct(objects);
 	}
 
-	alloc.allocator.free(alloc.bytes);
+	VirtualAllocator::free(alloc);
+}
+
+Arena::Arena(Arena&& x)
+	: alloc(move(x.alloc))
+	, lastMeta(x.lastMeta)
+{
+	x = {};
+}
+
+Arena& Arena::operator=(Arena&& x)
+{
+	alloc = move(x.alloc);
+	lastMeta = x.lastMeta;
+	x.alloc = {};
+	x.lastMeta = nullptr;
+	return *this;
 }
 
 template <typename T>
@@ -113,20 +111,6 @@ Arena::push()
 	T& x = push(NoInit {});
 	defaultConstruct(x);
 }
-
-// TODO: There are a lot of dependencies on the allocator
-// * Block allocator requires a list of blocks
-// * Realloc requires a branch to skip relocation
-// * Virtual allocator requires a branch to skip relocation
-// * Overflow/underflow allocator requires custom offset on objects
-// Should arenas be able to use different allocators?
-
-// TODO: Who should make the initial allocation?
-// Option 1 - The caller
-//   Con: Asymmetric because the Arena is going to free it
-// Option 2 - Arena
-//   Con: Arena has to expose API for allocating
-//     Changes to allocators affect arena init code
 
 template <typename T>
 constexpr T&
@@ -139,7 +123,7 @@ Arena::push(NoInit)
 		if (!lastMeta || lastMeta->id != id<T>)
 		{
 			Meta& meta = push<Meta>(NoInit {});
-			u8* dst = alignUp<T>(alloc.bytes.data + alloc.bytes.len);
+			u8* dst = alignUp<T>(alloc.bytes.data + used);
 
 			new (&meta) Meta {
 				.id       = TypeInfo<T>::id,
@@ -156,18 +140,19 @@ Arena::push(NoInit)
 		lastMeta->count++;
 	}
 
-	u8* dst = alignUp<T>(alloc.bytes.data + alloc.bytes.len);
+	// TODO: Try to simplify this
+	u8* dst = alignUp<T>(alloc.bytes.data + used);
 	u8* end = dst + sizeof(T);
-	if (end > alloc.bytes.data + alloc.cap)
+	i64 required = end - alloc.bytes.data;
+	if (required > alloc.bytes.len)
 	{
-		i64 newCap = alloc.cap * alloc.allocator.growthFactor;
+		i64 newCap = alloc.bytes.len * goldenRatio<f32>;
+		assert(alloc.reserved >= required);
 		newCap = min(newCap, alloc.reserved);
-		assert(newCap > alloc.cap);
-		Span newBytes = alloc.bytes.next(newCap - alloc.cap);
-		commitBytes(newBytes);
+		alloc = VirtualAllocator::commit(alloc, newCap);
 	}
 
-	T& x = *static_cast<T*>(dst);
+	T& x = *reinterpret_cast<T*>(dst);
 	return x;
 }
 
@@ -176,7 +161,7 @@ constexpr T&
 Arena::push(T&& value)
 {
 	T& x = push(NoInit {});
-	new (&x) T { forward(value) };
+	new (&x) T { move(value) };
 }
 
 template <typename T, typename ...Args>
@@ -186,4 +171,3 @@ Arena::push(Args&& ...args)
 	T& x = push(NoInit {});
 	new (&x) T { forward(args...) };
 }
-#endif
