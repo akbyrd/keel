@@ -18,12 +18,16 @@ struct Arena
 
 	Allocation alloc;
 	i64        used;
+	i64        reserved;
 	Meta*      lastMeta;
 
 	Arena() = default;
 	~Arena();
 
-	Arena(Span<const c8> name, Allocation alloc);
+	Arena(Span<const c8> name, Span<u8> bytes);
+	Arena(Span<const c8> name, Owned<Allocation> alloc);
+	Arena(Span<const c8> name, i64 size, u8 align);
+	Arena(Span<const c8> name, i64 reserve, i64 commit, u8 align);
 
 	Arena(const Arena&) = delete;
 	Arena& operator=(const Arena&) = delete;
@@ -62,9 +66,10 @@ struct Arena::Meta
 	DestructFn* destruct;
 };
 
-Arena::Arena(Span<const c8> name, Allocation alloc)
-	: alloc(move(alloc))
+Arena::Arena(Span<const c8> name, Span<u8> bytes)
+	: alloc({ bytes })
 	, used(0)
+	, reserved(0)
 	, lastMeta(nullptr)
 {
 	(void) name;
@@ -73,6 +78,20 @@ Arena::Arena(Span<const c8> name, Allocation alloc)
 	//Span<c8> nameCopy = pushArray<c8>(name.len);
 	//copyConstruct(nameCopy, name);
 }
+
+Arena::Arena(Span<const c8> name, i64 size, u8 align)
+	: alloc(VirtualAllocator::allocate(size, align))
+	, used(0)
+	, reserved(size)
+	, lastMeta(nullptr)
+{}
+
+Arena::Arena(Span<const c8> name, i64 reserve, i64 commit, u8 align)
+	: alloc(VirtualAllocator::reserve(reserve, commit, align))
+	, used(0)
+	, reserved(reserve)
+	, lastMeta(nullptr)
+{}
 
 Arena::~Arena()
 {
@@ -85,7 +104,8 @@ Arena::~Arena()
 		meta.destruct(objects);
 	}
 
-	VirtualAllocator::free(alloc);
+	if (reserved)
+		VirtualAllocator::free(alloc);
 }
 
 Arena::Arena(Arena&& x)
@@ -146,10 +166,17 @@ Arena::push(NoInit)
 	i64 required = end - alloc.bytes.data;
 	if (required > alloc.bytes.len)
 	{
-		i64 newCap = alloc.bytes.len * goldenRatio<f32>;
-		assert(alloc.reserved >= required);
-		newCap = min(newCap, alloc.reserved);
-		alloc = VirtualAllocator::commit(alloc, newCap);
+		if (reserved)
+		{
+			i64 newCap = alloc.bytes.len * goldenRatio<f32>;
+			assert(reserved >= required);
+			newCap = min(newCap, reserved);
+			alloc = VirtualAllocator::commit(alloc, newCap);
+		}
+		else
+		{
+			// TODO: crash
+		}
 	}
 
 	T& x = *reinterpret_cast<T*>(dst);
