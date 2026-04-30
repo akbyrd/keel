@@ -23,7 +23,7 @@ struct Arena
 	Arena() = default;
 	~Arena();
 
-	Arena(Span<const c8> name, Allocation alloc);
+	Arena(Span<const c8> name, Allocation&& alloc);
 
 	Arena(const Arena&) = delete;
 	Arena& operator=(const Arena&) = delete;
@@ -62,12 +62,13 @@ struct Arena::Meta
 	DestructFn* destruct;
 };
 
-Arena::Arena(Span<const c8> name, Allocation alloc)
-	: alloc(move(alloc))
+Arena::Arena(Span<const c8> name, Allocation&& alloc)
+	: alloc(alloc)
 	, used(0)
 	, lastMeta(nullptr)
 {
 	(void) name;
+	alloc = {};
 
 	// TODO: Implement
 	//Span<c8> nameCopy = pushArray<c8>(name.len);
