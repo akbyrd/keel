@@ -16,6 +16,14 @@ struct Allocation
 {
 	Span<u8> bytes;
 	i64      reserved;
+
+	Allocation() = default;
+
+	Allocation(const Allocation&) = delete;
+	Allocation& operator=(const Allocation&) = delete;
+
+	Allocation(Allocation&&);
+	Allocation& operator=(Allocation&&);
 };
 
 struct VirtualAllocator
@@ -32,3 +40,24 @@ struct VirtualAllocator
 
 // TODO: This will conflict with <new>
 inline void* operator new(u64, void* x) { return x; }
+
+inline
+Allocation::Allocation(Allocation&& x)
+	: bytes(x.bytes)
+	, reserved(x.reserved)
+{
+	x = {};
+}
+
+inline Allocation&
+Allocation::operator=(Allocation&& x)
+{
+	if (&x != this)
+	{
+		bytes      = x.bytes;
+		reserved   = x.reserved;
+		x.bytes    = {};
+		x.reserved = 0;
+	}
+	return *this;
+}

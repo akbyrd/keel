@@ -7,6 +7,7 @@
 #include "core/math.hpp"
 #include "core/win32.hpp"
 #include "memory/allocator.hpp"
+#include "memory/lifetime.hpp"
 
 namespace AllocatorInternal
 {
@@ -123,10 +124,10 @@ VirtualAllocator::reserve(i64 reserve, i64 commit, u8 align)
 		.reserved     = reserve,
 	};
 
-	return Allocation {
-		.bytes    = { commit - userOffset, allocBytes + userOffset },
-		.reserved = reserve - userOffset,
-	};
+	Allocation alloc = {};
+	alloc.bytes    = { commit - userOffset, allocBytes + userOffset };
+	alloc.reserved = reserve - userOffset;
+	return move(alloc);
 }
 
 Allocation&
@@ -160,7 +161,7 @@ VirtualAllocator::free(Allocation& alloc)
 	void* allocData = reinterpret_cast<u8*>(&header) - header.headerOffset;
 	b8 result = VirtualFree(allocData, 0, MEM_RELEASE);
 	assertWin32(result);
-	alloc = {};
+	alloc = move(Allocation {});
 	return alloc;
 }
 
