@@ -16,14 +16,16 @@ struct Arena
 {
 	struct Meta;
 
-	Allocation alloc;
-	i64        used;
-	Meta*      lastMeta;
+	Span<u8> bytes;
+	i64      used;
+	i64      reserved;
+	Meta*    lastMeta;
 
 	Arena() = default;
 	~Arena();
 
-	Arena(Span<const c8> name, Allocation alloc);
+	Arena(Span<const c8> name, Span<u8> bytes);
+	Arena(Span<const c8> name, Allocation alloc, i64 reserved);
 
 	Arena(const Arena&) = delete;
 	Arena& operator=(const Arena&) = delete;
@@ -62,9 +64,14 @@ struct Arena::Meta
 	DestructFn* destruct;
 };
 
-Arena::Arena(Span<const c8> name, Allocation alloc)
-	: alloc(move(alloc))
+Arena::Arena(Span<const c8> name, Span<u8> bytes)
+	: Arena(name, Allocation { bytes }, 0)
+{}
+
+Arena::Arena(Span<const c8> name, Allocation alloc, i64 reserved)
+	: bytes(alloc.bytes)
 	, used(0)
+	, reserved(reserved)
 	, lastMeta(nullptr)
 {
 	(void) name;
@@ -81,15 +88,15 @@ Arena::~Arena()
 		const Meta& meta = *lastMeta;
 
 		// TODO: Does the order of destruction matter?
-		Span<u8> objects = { meta.count * meta.size, alloc.bytes.data + meta.offset };
+		Span<u8> objects = { meta.count * meta.size, bytes.data + meta.offset };
 		meta.destruct(objects);
 	}
-
-	VirtualAllocator::free(alloc);
 }
 
 Arena::Arena(Arena&& x)
-	: alloc(move(x.alloc))
+	: bytes(x.bytes)
+	, used(x.used)
+	, reserved(x.reserved)
 	, lastMeta(x.lastMeta)
 {
 	x = {};
@@ -97,10 +104,12 @@ Arena::Arena(Arena&& x)
 
 Arena& Arena::operator=(Arena&& x)
 {
-	alloc = move(x.alloc);
+	bytes    = x.bytes;
+	used     = x.used;
+	reserved = x.reserved;
 	lastMeta = x.lastMeta;
-	x.alloc = {};
-	x.lastMeta = nullptr;
+
+	x = {};
 	return *this;
 }
 
@@ -123,12 +132,12 @@ Arena::push(NoInit)
 		if (!lastMeta || lastMeta->id != id<T>)
 		{
 			Meta& meta = push<Meta>(NoInit {});
-			u8* dst = alignUp<T>(alloc.bytes.data + used);
+			u8* dst = alignUp<T>(bytes.data + used);
 
 			new (&meta) Meta {
 				.id       = TypeInfo<T>::id,
 				.size     = TypeInfo<T>::size,
-				.offset   = dst - alloc.bytes.data, // TODO: RelPtr?
+				.offset   = dst - bytes.data, // TODO: RelPtr?
 				.count    = 0,
 				.prevMeta = lastMeta,
 				.destruct = TypeInfo<T>::destruct,
@@ -141,15 +150,16 @@ Arena::push(NoInit)
 	}
 
 	// TODO: Try to simplify this
-	u8* dst = alignUp<T>(alloc.bytes.data + used);
+	u8* dst = alignUp<T>(bytes.data + used);
 	u8* end = dst + sizeof(T);
-	i64 required = end - alloc.bytes.data;
-	if (required > alloc.bytes.len)
+	i64 required = end - bytes.data;
+	if (required > bytes.len)
 	{
-		i64 newCap = alloc.bytes.len * goldenRatio<f32>;
-		assert(alloc.reserved >= required);
-		newCap = min(newCap, alloc.reserved);
-		alloc = VirtualAllocator::commit(alloc, newCap);
+		i64 newCap = bytes.len * goldenRatio<f32>;
+		assert(reserved >= required);
+		newCap = min(newCap, reserved);
+		Allocation alloc = { bytes };
+		VirtualAllocator::commit(alloc, newCap);
 	}
 
 	T& x = *reinterpret_cast<T*>(dst);
