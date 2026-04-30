@@ -19,11 +19,11 @@ struct Allocation
 
 struct VirtualAllocator
 {
-	static b8          init   ();
-	static Allocation  alloc  (i64 size, u8 align);
-	static Allocation  alloc  (i64 reserve, i64 commit, u8 align);
-	static Allocation& commit (Allocation& allocation, i64 size);
-	static Allocation& free   (Allocation& allocation);
+	static b8          init     ();
+	static Allocation  allocate (i64 size, u8 align);
+	static Allocation  reserve  (i64 reserve, i64 commit, u8 align);
+	static Allocation& commit   (Allocation& alloc, i64 size);
+	static Allocation& free     (Allocation& alloc);
 };
 
 // -------------------------------------------------------------------------------------------------

@@ -10,30 +10,28 @@
 
 namespace AllocatorInternal
 {
-	static inline constexpr u16 id               = 0xA11C;
+	static inline constexpr u16 typeId           = 0xA11C;
 	static inline constexpr u8  maxAlign         = 64;
 	static inline constinit u32 pageSize         = 0;
 	static inline constinit u32 allocGranularity = 0;
 
 	struct Header
 	{
-		// TODO: struct TypeId? struct AllocTypeIndex?
-		// TODO: Rename
-		u16 id;
+		u16 typeId; // TODO: Implement a proper type id
 		u8  headerOffset;
 		u8  userOffset;
 		i64 committed;
 		i64 reserved;
 	};
 
-	static Header& getHeader(Allocation& allocation)
+	static Header& getHeader(Allocation& alloc)
 	{
-		assert(allocation.bytes.data);
-		i64 userAddr   = i64(allocation.bytes.data);
+		assert(alloc.bytes.data);
+		i64 userAddr   = i64(alloc.bytes.data);
 		i64 headerAddr = roundDown<i64>(userAddr - sizeof(Header), alignof(Header));
 
 		Header& header = *reinterpret_cast<Header*>(headerAddr);
-		assert(header.id == id);
+		assert(header.typeId == typeId);
 		return header;
 	}
 }
@@ -72,13 +70,13 @@ VirtualAllocator::init()
 }
 
 Allocation
-VirtualAllocator::alloc(i64 size, u8 align)
+VirtualAllocator::allocate(i64 size, u8 align)
 {
-	return alloc(size, size, align);
+	return reserve(size, size, align);
 }
 
 Allocation
-VirtualAllocator::alloc(i64 reserve, i64 commit, u8 align)
+VirtualAllocator::reserve(i64 reserve, i64 commit, u8 align)
 {
 	// Layout: [Slack | Header | Data]
 
@@ -118,7 +116,7 @@ VirtualAllocator::alloc(i64 reserve, i64 commit, u8 align)
 	u8* allocBytes = static_cast<u8*>(allocData);
 	auto& header = *new (allocBytes + headerOffset) Header {};
 	header = Header {
-		.id           = id,
+		.typeId       = typeId,
 		.headerOffset = u8(headerOffset),
 		.userOffset   = u8(userOffset),
 		.committed    = commit,
@@ -131,24 +129,11 @@ VirtualAllocator::alloc(i64 reserve, i64 commit, u8 align)
 }
 
 Allocation&
-VirtualAllocator::free(Allocation& allocation)
+VirtualAllocator::commit(Allocation& alloc, i64 size)
 {
 	using namespace AllocatorInternal;
 
-	Header& header = getHeader(allocation);
-	void* allocData = reinterpret_cast<u8*>(&header) - header.headerOffset;
-	b8 result = VirtualFree(allocData, 0, MEM_RELEASE);
-	assertWin32(result);
-	allocation = {};
-	return allocation;
-}
-
-Allocation&
-VirtualAllocator::commit(Allocation& allocation, i64 size)
-{
-	using namespace AllocatorInternal;
-
-	Header& header = getHeader(allocation);
+	Header& header = getHeader(alloc);
 	size = roundUp<i64>(header.userOffset + size, pageSize);
 	size = max(size, header.committed);
 	assert(size <= header.reserved);
@@ -161,8 +146,21 @@ VirtualAllocator::commit(Allocation& allocation, i64 size)
 	assertWin32(allocData);
 
 	header.committed = size;
-	allocation.bytes.len = size - header.userOffset;
-	return allocation;
+	alloc.bytes.len = size - header.userOffset;
+	return alloc;
+}
+
+Allocation&
+VirtualAllocator::free(Allocation& alloc)
+{
+	using namespace AllocatorInternal;
+
+	Header& header = getHeader(alloc);
+	void* allocData = reinterpret_cast<u8*>(&header) - header.headerOffset;
+	b8 result = VirtualFree(allocData, 0, MEM_RELEASE);
+	assertWin32(result);
+	alloc = move(Allocation {});
+	return alloc;
 }
 
 #endif
