@@ -4,6 +4,7 @@
 #include "core/meta.hpp"
 #include "memory/allocator.hpp"
 #include "memory/lifetime.hpp"
+#include "memory/ownership.hpp"
 
 // -------------------------------------------------------------------------------------------------
 // Interface
@@ -23,7 +24,7 @@ struct Arena
 	Arena() = default;
 	~Arena();
 
-	Arena(Span<const c8> name, Allocation alloc);
+	Arena(Span<const c8> name, Owned<Allocation> alloc);
 
 	Arena(const Arena&) = delete;
 	Arena& operator=(const Arena&) = delete;
@@ -62,8 +63,8 @@ struct Arena::Meta
 	DestructFn* destruct;
 };
 
-Arena::Arena(Span<const c8> name, Allocation alloc)
-	: alloc(move(alloc))
+Arena::Arena(Span<const c8> name, Owned<Allocation> alloc)
+	: alloc(alloc.val)
 	, used(0)
 	, lastMeta(nullptr)
 {
