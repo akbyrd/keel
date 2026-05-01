@@ -168,6 +168,17 @@ There are multiple ways we could store metadata.
 * Con: Metadata for an allocation is far away from the data itself. Likely a cache miss.
 * Con: Exacerbates cache aliasing because each allocation is page aligned.
 
+## Allocation Ownership
+
+3 axes to consider:
+* Who allocates? The user or the arena?
+* How is the allocation transferred? Copied or moved?
+* Who frees? The user or the arena?
+
+Copying an allocation seems like a bad idea. It's a footgun to have two allocation structs pointing the same actual allocation.
+The arena needs ownership of the allocation because it commits as needed, which mutates the allocation.
+Moving the allocation avoid duplicating the allocator API on the arena, but it requires move semantics for allocations.
+
 
 
 # Usage Patterns
