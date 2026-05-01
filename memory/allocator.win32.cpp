@@ -24,7 +24,7 @@ namespace AllocatorInternal
 		i64 reserved;
 	};
 
-	static Header& getHeader(Allocation& alloc)
+	static const Header& getHeader(const Allocation& alloc)
 	{
 		assert(alloc.bytes.data);
 		i64 userAddr   = i64(alloc.bytes.data);
@@ -33,6 +33,13 @@ namespace AllocatorInternal
 		Header& header = *reinterpret_cast<Header*>(headerAddr);
 		assert(header.typeId == typeId);
 		return header;
+	}
+
+	static Header& getHeader(Allocation& alloc)
+	{
+		const Allocation& constAlloc = alloc;
+		const Header& header = getHeader(constAlloc);
+		return const_cast<Header&>(header);
 	}
 }
 
@@ -124,12 +131,11 @@ VirtualAllocator::reserve(i64 reserve, i64 commit, u8 align)
 	};
 
 	return Allocation {
-		.bytes    = { commit - userOffset, allocBytes + userOffset },
-		.reserved = reserve - userOffset,
+		.bytes = { commit - userOffset, allocBytes + userOffset },
 	};
 }
 
-Allocation&
+void
 VirtualAllocator::commit(Allocation& alloc, i64 size)
 {
 	using namespace AllocatorInternal;
@@ -148,10 +154,9 @@ VirtualAllocator::commit(Allocation& alloc, i64 size)
 
 	header.committed = size;
 	alloc.bytes.len = size - header.userOffset;
-	return alloc;
 }
 
-Allocation&
+void
 VirtualAllocator::free(Allocation& alloc)
 {
 	using namespace AllocatorInternal;
@@ -161,7 +166,15 @@ VirtualAllocator::free(Allocation& alloc)
 	b8 result = VirtualFree(allocData, 0, MEM_RELEASE);
 	assertWin32(result);
 	alloc = {};
-	return alloc;
+}
+
+i64
+VirtualAllocator::getReserved(const Allocation& alloc)
+{
+	using namespace AllocatorInternal;
+
+	const Header& header = getHeader(alloc);
+	return header.reserved;
 }
 
 #endif
