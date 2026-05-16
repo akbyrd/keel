@@ -6,12 +6,10 @@
 // -------------------------------------------------------------------------------------------------
 // Interface
 
-// TODO: How are documentation comments handled with this split?
-// TODO: Parse and generate documentation
-// TODO: Tests that verify the interface + implementation split
 // TODO: Test negative integers
 // TODO: Test integer promotion
-// TODO: void* or u8*?
+// TODO: Test and document special cases (NaN, Inf, inverted bounds, overflow, underflow, etc)
+// TODO: Implement safe and unsafe versions
 
 template <typename T> requires (isUnsigned<T>) constexpr u8 countSetBits(T x);
 template <typename T> requires (isIntegral<T>) constexpr b8 isPowerOf2(T x);
@@ -21,6 +19,7 @@ template <typename T> requires (isIntegral<T>) constexpr T  roundDown(T x, T rou
 
 template <typename T> constexpr T min(T x, T y);
 template <typename T> constexpr T max(T x, T y);
+template <typename T> constexpr T clamp(T x, T min, T max);
 
 template <typename T> constexpr T*  alignUp(T* x);
 template <typename T> constexpr u8* alignUp(u8* x);
@@ -103,13 +102,23 @@ constexpr T roundDown(T x, T round)
 template <typename T>
 constexpr T min(T x, T y)
 {
+	// NOTE: May propagate NaN
 	return x < y ? x : y;
 }
 
 template <typename T>
 constexpr T max(T x, T y)
 {
+	// NOTE: May propagate NaN
 	return x > y ? x : y;
+}
+
+template <typename T>
+constexpr T clamp(T x, T min, T max)
+{
+	// NOTE: May propagate NaN
+	// NOTE: Does not handle inverted bounds
+	return x <= min ? min : x >= max ? max : x;
 }
 
 // TODO: Try removing this overload
@@ -121,7 +130,7 @@ constexpr u8* alignUp(u8* x)
 	constexpr u64 align = alignof(T);
 	static_assert(isPowerOf2(align));
 
-	u8* result = x + (-u64(x) & (align - 1));
+	u8* result = x + (-i64(x) & (align - 1));
 	return result;
 }
 
