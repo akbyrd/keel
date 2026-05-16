@@ -130,9 +130,7 @@ VirtualAllocator::reserve(i64 reserve, i64 commit, u8 align)
 		.reserved     = reserve,
 	};
 
-	return Allocation {
-		.bytes = { commit - userOffset, allocBytes + userOffset },
-	};
+	return Allocation { Span<u8> { commit - userOffset, allocBytes + userOffset } };
 }
 
 void

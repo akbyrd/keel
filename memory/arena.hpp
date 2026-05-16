@@ -70,7 +70,7 @@ struct Arena::Meta
 
 inline
 Arena::Arena(Span<const c8> name, Span<u8> bytes)
-	: alloc({ bytes })
+	: alloc(Allocation { bytes })
 	, used(0)
 	, reserved(0)
 	, lastMeta(nullptr)
