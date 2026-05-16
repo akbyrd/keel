@@ -43,10 +43,10 @@ struct Arena
 
 	template <typename T>                   constexpr Span<T> pushArray (i64 count);
 	template <typename T>                   constexpr Span<T> pushArray (i64 count, NoInit);
-	//template <typename T>                   constexpr Span<T> pushArray (i64 count, T&& value);
-	//template <typename T, typename ...Args> constexpr Span<T> pushArray (i64 count, Args&& ...args);
+	template <typename T>                   constexpr Span<T> pushArray (i64 count, T&& value);
+	template <typename T, typename ...Args> constexpr Span<T> pushArray (i64 count, Args&& ...args);
 	template <typename T, typename ...Args> constexpr Span<T> pushArray (Span<const T> values);
-	//template <typename T, typename ...Args> constexpr Span<T> pushArray (Span<T>&& values);
+	template <typename T, typename ...Args> constexpr Span<T> pushArray (Span<T>&& values);
 
 	// TODO: scope
 	// TODO: overhead (arena, allocator, total)
@@ -68,6 +68,7 @@ struct Arena::Meta
 	DestructFn* destruct;
 };
 
+inline
 Arena::Arena(Span<const c8> name, Span<u8> bytes)
 	: alloc({ bytes })
 	, used(0)
@@ -77,6 +78,7 @@ Arena::Arena(Span<const c8> name, Span<u8> bytes)
 	pushArray<c8>(name);
 }
 
+inline
 Arena::Arena(Span<const c8> name, Owned<Allocation> alloc)
 	: alloc(alloc.val)
 	, used(0)
@@ -86,6 +88,7 @@ Arena::Arena(Span<const c8> name, Owned<Allocation> alloc)
 	pushArray<c8>(name);
 }
 
+inline
 Arena::Arena(Span<const c8> name, i64 size, u8 align)
 	: alloc(VirtualAllocator::allocate(size, align))
 	, used(0)
@@ -95,6 +98,7 @@ Arena::Arena(Span<const c8> name, i64 size, u8 align)
 	pushArray<c8>(name);
 }
 
+inline
 Arena::Arena(Span<const c8> name, i64 reserve, i64 commit, u8 align)
 	: alloc(VirtualAllocator::reserve(reserve, commit, align))
 	, used(0)
@@ -104,13 +108,13 @@ Arena::Arena(Span<const c8> name, i64 reserve, i64 commit, u8 align)
 	pushArray<c8>(name);
 }
 
+inline
 Arena::~Arena()
 {
 	for (; lastMeta; lastMeta = lastMeta->prevMeta)
 	{
 		const Meta& meta = *lastMeta;
 
-		// TODO: Does the order of destruction matter?
 		Span<u8> objects = { meta.count * meta.size, alloc.bytes.data + meta.offset };
 		meta.destruct(objects);
 	}
@@ -119,6 +123,7 @@ Arena::~Arena()
 		VirtualAllocator::free(alloc);
 }
 
+inline
 Arena::Arena(Arena&& x)
 	: alloc(move(x.alloc))
 	, lastMeta(x.lastMeta)
@@ -126,7 +131,8 @@ Arena::Arena(Arena&& x)
 	x = {};
 }
 
-Arena& Arena::operator=(Arena&& x)
+inline Arena&
+Arena::operator=(Arena&& x)
 {
 	alloc = move(x.alloc);
 	lastMeta = x.lastMeta;
@@ -139,7 +145,6 @@ template <typename T>
 constexpr T&
 Arena::push()
 {
-	// TODO: Revisit T
 	Span<T> x = pushArray<T>(1, NoInit {});
 	defaultConstruct(x);
 	return x[0];
@@ -149,8 +154,8 @@ template <typename T>
 constexpr T&
 Arena::push(NoInit)
 {
-	Span<T> arr = pushArray<T>(1, NoInit {});
-	return arr[0];
+	Span<T> x = pushArray<T>(1, NoInit {});
+	return x[0];
 }
 
 template <typename T>
@@ -158,7 +163,7 @@ constexpr T&
 Arena::push(T&& value)
 {
 	Span<T> x = pushArray<T>(1, NoInit {});
-	new (&x[0]) T { move(value) };
+	moveConstruct(x, move(value));
 	return x[0];
 }
 
@@ -167,7 +172,7 @@ constexpr T&
 Arena::push(Args&& ...args)
 {
 	Span<T> x = pushArray<T>(1, NoInit {});
-	new (&x[0]) T { forward(args...) };
+	construct(x[0], forward(args)...);
 	return x[0];
 }
 
@@ -185,6 +190,8 @@ Arena::pushArray(i64 count, NoInit)
 			u8* dst = alignUp<T>(alloc.bytes.data + used);
 
 			Meta& meta = metas[0];
+			// TODO: Compare
+			//construct(meta, {
 			new (&meta) Meta {
 				.id       = TypeInfo<T>::id,
 				.size     = TypeInfo<T>::size,
@@ -231,11 +238,38 @@ Arena::pushArray(i64 count)
 	defaultConstruct(x);
 }
 
+template <typename T>
+constexpr Span<T>
+Arena::pushArray(i64 count, T&& value)
+{
+	Span<T> x = pushArray<T>(count, NoInit {});
+	moveConstruct(x, forward(value));
+}
+
+template <typename T, typename ...Args>
+constexpr Span<T>
+pushArray (i64 count, Args&& ...args)
+{
+	Span<T> x = pushArray<T>(count, NoInit {});
+	construct(x[0], forward(args)...);
+	for (i64 i = 1; i < count; ++i)
+		x[i] = x[0];
+}
+
 template <typename T, typename ...Args>
 constexpr Span<T>
 Arena::pushArray(Span<const T> values)
 {
 	Span<T> x = pushArray<T>(values.len, NoInit {});
-	copyConstruct(x, values );
+	copyConstruct(x, values);
+	return x;
+}
+
+template <typename T, typename ...Args>
+constexpr Span<T>
+Arena::pushArray(Span<T>&& values)
+{
+	Span<T> x = pushArray<T>(values.len, NoInit {});
+	moveConstruct(x, values);
 	return x;
 }
