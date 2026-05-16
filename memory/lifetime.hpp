@@ -10,21 +10,33 @@
 // TODO: Prevent move on const&
 template <typename T> constexpr removeRef<T>&& move(T&& x);
 template <typename T> constexpr T&& forward(removeRef<T>& x);
-template <typename T> constexpr T&& forward(removeRef<T>&& x);
+//template <typename T> constexpr T&& forward(removeRef<T>& x);
+//template <typename T> constexpr T&& forward(removeRef<T>&& x);
+template <typename T> constexpr T&& forward(T&& x);
 
 // TODO: Think about the exact set of operations we want
+template <typename T, typename... Args> constexpr void construct(T& dst, Args&& ...args);
+template <typename T, typename... Args> constexpr void construct(Span<T> dst, Args&& ...args);
+template <typename T> constexpr void defaultConstruct(T& dst);
 template <typename T> constexpr void defaultConstruct(Span<T> dst);
+template <typename T> constexpr void valueConstruct(T& dst);
 template <typename T> constexpr void valueConstruct(Span<T> dst);
+template <typename T> constexpr void copyConstruct(T& dst, const T& src);
 template <typename T> constexpr void copyConstruct(Span<T> dst, const T& src);
 template <typename T> constexpr void copyConstruct(Span<T> dst, Span<const T> src);
+template <typename T> constexpr void moveConstruct(T& dst, T&& src);
 template <typename T> constexpr void moveConstruct(Span<T> dst, T&& src);
 template <typename T> constexpr void moveConstruct(Span<T> dst, Span<T> src);
-template <typename T> constexpr void destruct(Span<T> dst);
-template <typename T> constexpr void relocate(Span<T> dst, Span<T> src);
+template <typename T> constexpr void copyAssign(T& dst, const T& src);
 template <typename T> constexpr void copyAssign(Span<T> dst, const T& src);
 template <typename T> constexpr void copyAssign(Span<T> dst, Span<const T> src);
+template <typename T> constexpr void moveAssign(T& dst, T&& src);
 template <typename T> constexpr void moveAssign(Span<T> dst, T&& src);
 template <typename T> constexpr void moveAssign(Span<T> dst, Span<T> src);
+template <typename T> constexpr void destruct(T& dst);
+template <typename T> constexpr void destruct(Span<T> dst);
+template <typename T> constexpr void relocate(T& dst, T&& src);
+template <typename T> constexpr void relocate(Span<T> dst, Span<T> src);
 
 // -------------------------------------------------------------------------------------------------
 // Implementation
@@ -36,6 +48,7 @@ move(T&& x)
 	return static_cast<removeRef<T>&&>(x);
 }
 
+#if false
 template <typename T>
 constexpr T&&
 forward(removeRef<T>& x)
@@ -50,42 +63,40 @@ forward(removeRef<T>&& x)
 	static_assert(!isLValueRef<T>);
 	return static_cast<T&&>(x);
 }
-
-// TODO: Is this correct? (check all type traits in this file)
+#else
+// TODO: Test this thoroughly
 template <typename T>
-constexpr void copyAssign(Span<T> dst, Span<const T> src)
+constexpr T&&
+forward(T&& x)
 {
-	if constexpr (isTriviallyCopyAssignable<T>)
-	{
-		copyBytes(dst.asBytes(), src.asBytes());
-	}
-	else
-	{
-		assert(dst.len >= src.len);
-		assert(!dst.overlaps(src));
+	if constexpr (isRValueRef<decltype(x)>)
+		static_assert(!isLValueRef<T>);
 
-		for (i64 i = 0; i < src.len; ++i)
-			dst.data[i] = src.data[i];
-	}
+	return static_cast<T&&>(x);
+}
+#endif
+
+template <typename T, typename... Args>
+constexpr void
+construct(T& dst, Args&& ...args)
+{
+	new (&dst) T { forward(args)... };
 }
 
-// TODO: Is this correct? (check all type traits in this file)
-template <typename T>
-constexpr void moveAssign(Span<T> dst, Span<T> src)
+template <typename T, typename... Args>
+constexpr void
+construct(Span<T> dst, Args&& ...args)
 {
-	if constexpr (isTriviallyMoveAssignable<T>)
-	{
-		moveBytes(dst.asBytes(), src.asBytes());
-	}
-	else
-	{
-		assert(dst.len >= src.len);
-		assert(!dst.overlaps(src));
+	new (&dst.data[0]) T { forward(args)... };
+	for (i64 i = 1; i < dst.len; ++i)
+		dst.data[i] = dst.data[0];
+}
 
-		for (i64 i = 0; i < src.len; ++i)
-			// TODO: move or forward?
-			dst.data[i] = move(src.data[i]);
-	}
+template <typename T>
+constexpr void
+defaultConstruct(T& dst)
+{
+	new (&dst) T;
 }
 
 template <typename T>
@@ -97,9 +108,24 @@ defaultConstruct(Span<T> dst)
 
 template <typename T>
 constexpr void
+valueConstruct(T& dst)
+{
+	new (&dst) T {};
+}
+
+template <typename T>
+constexpr void
 valueConstruct(Span<T> dst)
 {
 	new (dst.data) T[dst.len] {};
+}
+
+template <typename T>
+constexpr void
+copyConstruct(T& dst, const T& src)
+{
+	assert(&dst != src);
+	new (&dst) T { src };
 }
 
 template <typename T>
@@ -130,6 +156,16 @@ copyConstruct(Span<T> dst, Span<const T> src)
 
 template <typename T>
 constexpr void
+moveConstruct(T& dst, T&& src)
+{
+	assert(&dst != &src);
+
+	// TODO: move or forward?
+	new (&dst) T { move(src) };
+}
+
+template <typename T>
+constexpr void
 moveConstruct(Span<T> dst, T&& src)
 {
 	assert(!dst.overlaps(src));
@@ -141,6 +177,9 @@ moveConstruct(Span<T> dst, T&& src)
 }
 
 // TODO: Is this correct? (check all type traits in this file)
+// TODO: Implement proper Span length checks for everything in this file
+// * Are operations driven by the length of src or dst? Do they have to match?
+// * What happens with zero length Spans?
 template <typename T>
 constexpr void
 moveConstruct(Span<T> dst, Span<T> src)
@@ -161,6 +200,87 @@ moveConstruct(Span<T> dst, Span<T> src)
 
 template <typename T>
 constexpr void
+copyAssign(T& dst, const T& src)
+{
+	// TODO: Use isTriviallyCopyAssignable
+	dst = src;
+}
+
+template <typename T>
+constexpr void
+copyAssign(Span<T> dst, const T& src)
+{
+	// TODO: Use isTriviallyCopyAssignable
+	// TODO: Maybe want something like spreadBytes?
+	for (i64 i = 0; i < dst.len; ++i)
+		dst.data[i] = src;
+}
+
+// TODO: Is this correct? (check all type traits in this file)
+template <typename T>
+constexpr void
+copyAssign(Span<T> dst, Span<const T> src)
+{
+	if constexpr (isTriviallyCopyAssignable<T>)
+	{
+		copyBytes(dst.asBytes(), src.asBytes());
+	}
+	else
+	{
+		assert(dst.len >= src.len);
+		assert(!dst.overlaps(src));
+
+		for (i64 i = 0; i < src.len; ++i)
+			dst.data[i] = src.data[i];
+	}
+}
+
+template <typename T>
+constexpr void
+moveAssign(T& dst, T&& src)
+{
+	// TODO: Use isTriviallyMoveAssignable
+	// TODO: move or forward?
+	dst = move(src);
+}
+
+template <typename T>
+constexpr void
+moveAssign(Span<T> dst, T&& src)
+{
+	// TODO: Use isTriviallyMoveAssignable
+
+	assert(dst.len >= src.len);
+	assert(!dst.overlaps(src));
+
+	// TODO: move or forward?
+	dst[0] = move(src);
+	for (i64 i = 1; i < src.len; ++i)
+		dst.data[i] = dst.data[0];
+}
+
+// TODO: Is this correct? (check all type traits in this file)
+template <typename T>
+constexpr void
+moveAssign(Span<T> dst, Span<T> src)
+{
+	if constexpr (isTriviallyMoveAssignable<T>)
+	{
+		copyBytes(dst.asBytes(), src.asBytes());
+	}
+	else
+	{
+		assert(dst.len >= src.len);
+		assert(!dst.overlaps(src));
+
+		for (i64 i = 0; i < src.len; ++i)
+			// TODO: move or forward?
+			dst.data[i] = move(src.data[i]);
+	}
+}
+
+template <typename T>
+constexpr void
 destruct(Span<T> dst)
 {
 	if constexpr (isTriviallyDestructible<T>)
@@ -172,6 +292,30 @@ destruct(Span<T> dst)
 		for (T& x : dst)
 			x.~T();
 	}
+}
+
+template <typename T>
+constexpr void
+destruct(T& dst)
+{
+	if constexpr (isTriviallyDestructible<T>)
+	{
+		// Nothing to do
+	}
+	else
+	{
+		dst.~T();
+	}
+}
+
+template <typename T>
+constexpr void
+relocate(T& dst, T&& src)
+{
+	assert(&dst != &src);
+
+	dst = move(src);
+	destruct(src);
 }
 
 template <typename T>
