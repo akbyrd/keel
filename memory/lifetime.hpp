@@ -9,7 +9,7 @@
 
 // TODO: Prevent move on const&
 template <typename T> constexpr removeRef<T>&& move(T&& x);
-template <typename T> constexpr T&& forward(removeRef<T>& x);
+template <typename T> constexpr MoveSpan<T> move(Span<T> x);
 //template <typename T> constexpr T&& forward(removeRef<T>& x);
 //template <typename T> constexpr T&& forward(removeRef<T>&& x);
 template <typename T> constexpr T&& forward(T&& x);
@@ -26,17 +26,17 @@ template <typename T> constexpr void copyConstruct(Span<T> dst, const T& src);
 template <typename T> constexpr void copyConstruct(Span<T> dst, Span<const T> src);
 template <typename T> constexpr void moveConstruct(T& dst, T&& src);
 template <typename T> constexpr void moveConstruct(Span<T> dst, T&& src);
-template <typename T> constexpr void moveConstruct(Span<T> dst, Span<T> src);
+template <typename T> constexpr void moveConstruct(Span<T> dst, MoveSpan<T> src);
 template <typename T> constexpr void copyAssign(T& dst, const T& src);
 template <typename T> constexpr void copyAssign(Span<T> dst, const T& src);
 template <typename T> constexpr void copyAssign(Span<T> dst, Span<const T> src);
 template <typename T> constexpr void moveAssign(T& dst, T&& src);
 template <typename T> constexpr void moveAssign(Span<T> dst, T&& src);
-template <typename T> constexpr void moveAssign(Span<T> dst, Span<T> src);
+template <typename T> constexpr void moveAssign(Span<T> dst, MoveSpan<T> src);
 template <typename T> constexpr void destruct(T& dst);
 template <typename T> constexpr void destruct(Span<T> dst);
 template <typename T> constexpr void relocate(T& dst, T&& src);
-template <typename T> constexpr void relocate(Span<T> dst, Span<T> src);
+template <typename T> constexpr void relocate(Span<T> dst, MoveSpan<T> src);
 
 // -------------------------------------------------------------------------------------------------
 // Implementation
@@ -46,6 +46,13 @@ constexpr removeRef<T>&&
 move(T&& x)
 {
 	return static_cast<removeRef<T>&&>(x);
+}
+
+template <typename T>
+constexpr MoveSpan<T>
+move(Span<T> x)
+{
+	return x;
 }
 
 #if false
@@ -182,7 +189,7 @@ moveConstruct(Span<T> dst, T&& src)
 // * What happens with zero length Spans?
 template <typename T>
 constexpr void
-moveConstruct(Span<T> dst, Span<T> src)
+moveConstruct(Span<T> dst, MoveSpan<T> src)
 {
 	if constexpr (isTriviallyMoveConstructible<T>)
 	{
@@ -262,7 +269,7 @@ moveAssign(Span<T> dst, T&& src)
 // TODO: Is this correct? (check all type traits in this file)
 template <typename T>
 constexpr void
-moveAssign(Span<T> dst, Span<T> src)
+moveAssign(Span<T> dst, MoveSpan<T> src)
 {
 	if constexpr (isTriviallyMoveAssignable<T>)
 	{
@@ -320,7 +327,7 @@ relocate(T& dst, T&& src)
 
 template <typename T>
 constexpr void
-relocate(Span<T> dst, Span<T> src)
+relocate(Span<T> dst, MoveSpan<T> src)
 {
 	assert(!dst.overlaps(src));
 

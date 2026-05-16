@@ -4,7 +4,6 @@
 #include "core/meta.hpp"
 #include "memory/allocator.hpp"
 #include "memory/lifetime.hpp"
-#include "memory/ownership.hpp"
 
 // -------------------------------------------------------------------------------------------------
 // Interface
@@ -26,7 +25,7 @@ struct Arena
 	~Arena();
 
 	Arena(Span<const c8> name, Span<u8> bytes);
-	Arena(Span<const c8> name, Owned<Allocation> alloc);
+	Arena(Span<const c8> name, Allocation&& alloc);
 	Arena(Span<const c8> name, i64 size, u8 align);
 	Arena(Span<const c8> name, i64 reserve, i64 commit, u8 align);
 
@@ -46,7 +45,7 @@ struct Arena
 	template <typename T>                   constexpr Span<T> pushArray (i64 count, T&& value);
 	template <typename T, typename ...Args> constexpr Span<T> pushArray (i64 count, Args&& ...args);
 	template <typename T, typename ...Args> constexpr Span<T> pushArray (Span<const T> values);
-	template <typename T, typename ...Args> constexpr Span<T> pushArray (Span<T>&& values);
+	template <typename T, typename ...Args> constexpr Span<T> pushArray (MoveSpan<T> values);
 
 	// TODO: scope
 	// TODO: overhead (arena, allocator, total)
@@ -79,10 +78,10 @@ Arena::Arena(Span<const c8> name, Span<u8> bytes)
 }
 
 inline
-Arena::Arena(Span<const c8> name, Owned<Allocation> alloc)
-	: alloc(alloc.val)
+Arena::Arena(Span<const c8> name, Allocation&& alloc)
+	: alloc(alloc)
 	, used(0)
-	, reserved(VirtualAllocator::getReserved(alloc.val))
+	, reserved(VirtualAllocator::getReserved(alloc))
 	, lastMeta(nullptr)
 {
 	pushArray<c8>(name);
@@ -267,7 +266,7 @@ Arena::pushArray(Span<const T> values)
 
 template <typename T, typename ...Args>
 constexpr Span<T>
-Arena::pushArray(Span<T>&& values)
+Arena::pushArray(MoveSpan<T> values)
 {
 	Span<T> x = pushArray<T>(values.len, NoInit {});
 	moveConstruct(x, values);

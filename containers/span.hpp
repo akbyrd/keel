@@ -64,6 +64,13 @@ struct Span
 	constexpr Span<U> as() const;
 };
 
+template <typename T>
+struct MoveSpan : Span<T>
+{
+	constexpr T&&      operator[] (i64 x);
+	constexpr const T& operator[] (i64 x) const;
+};
+
 // -------------------------------------------------------------------------------------------------
 // Implementation
 
@@ -279,4 +286,13 @@ constexpr Span<U>
 Span<T>::as() const
 {
 	return { len / sizeof(U), reinterpret_cast<U*>(data) };
+}
+
+template <typename T>
+constexpr T&&
+MoveSpan<T>::operator[] (i64 x)
+{
+	using Base = Span<T>;
+	assert(x < Base::len);
+	return move(Base::data[x]);
 }
