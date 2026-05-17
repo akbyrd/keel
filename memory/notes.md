@@ -12,17 +12,72 @@
 * Allocations may return more memory than requested (but not less).
 
 
-# Allocator Metadata
+# Fundamental Parts
+* Allocator      - virtual, stack, gpu
+* Container      - arena, array, tlsf
+* Data Structure - set, map, DAG, BVH
 
-## Requirements
+## TODO
+* Consider Container vs Data Structure
+	* Should they be combined?
+
+
+
+# Allocators
+## TODO
+* Do we want unaligned alloc?
+* Investigate cache thrashing.
+	4 kB allocations will alias the same cache set, potentially thrashing.
+	Compare performance of different allocators in a real workload.
+	Might not be an issue since a small number of arenas will soak up most allocations and won't alias.
+	But if many small allocations are created they are going to end up in the same cache set.
+	5850x has a 32 kB 8-way cache. Would need >8 allocations in active use to begin thrashing.
+	But even without them being used at the same time L1 hit rate is going to be lower.
+	Aliasing happens at 32 kB / 8 = 4 kB increments. This is nearly universal.
+	Could use a random offset on allocations, but memory overhead would be high.
+* Decide on error handling
+* Decide on testing strategy (toggle between asserts and error codes?)
+* Create a user-overridable failure function
+* How do we initialize allocators (e.g. unchanging data like page size)?
+* Why different types for size and align?
+* Want a way to calculate overhead
+* Large pages?
+* Are allocations RAII?
+* Default allocator (alias that can be swapped out)
+* Hook new
+* Debugging
+	* Usage statistics
+	* Stack tracking
+	* Double free
+	* Use after free
+	* Overflow
+	* Underflow
+	* Thread check
+	* Fill patterns
+
+
+## Design Axes
+* Where the memory comes from - virtual, stack, gpu
+* How the memory is allocated - no reserve, reserve and manual commit, reserve and automatic commit
+* How objects are allocated   - stack, fixed size bins, free list, occupancy list
+The first two are the purview of memory allocators. The last is determined by the container.
+
+## Usage / Configuration
+* Who performs the allocation      - callee or caller
+* Which debug features are enabled - leak check, use after free, thread check, etc
+* Can debug checks be combined     - leak + thread, etc
+
+## Metadata
+
+### Requirements
 * No metadata is stored in the Allocation struct.
 * Different allocators support different metadata.
 * Concrete, non-wrapped allocators load metadata with a single non-dependent load.
 * Metadata can be extended when wrapping an allocator.
 
-## Possible Implementations
+### Possible Implementations
 
-### Store metadata at the front of the allocation
+#### Store metadata at the front of the allocation
 Return an opaque struct.
 * Pro: Caller only stores a pointer-sized object.
 * Pro: Can always figure out where an allocation came from with just a pointer.
@@ -31,12 +86,12 @@ Return an opaque struct.
 * Con: Indirection to get allocation metadata.
 * Con: Debuggers sometimes have issues showing details of opaque types.
 
-### Return a struct with metadata
+#### Return a struct with metadata
 * Pro: No indirection to access metadata.
 * Con: Changing the allocator requires code that uses the allocation to change (different type)
 * Con: It's easier for users to modify or stomp the metadata and corrupt it.
 
-### Return a struct with common metadata, store unique metadata at the front of the allocation
+#### Return a struct with common metadata, store unique metadata at the front of the allocation
 * Pro: Can still figure out where an allocation came from with just a pointer (but might store redundant data).
 * Pro: Retains flexibility to change implementation details.
 * Pro: No indirection to access metadata.
@@ -46,13 +101,10 @@ Return an opaque struct.
 * Con: Class of bugs - user passes wrong metadata (or modifies it).
 
 
-
-# Design axes
-* Where the memory comes from - virtual, stack
-* How the memory is allocated - no reserve, reserve and manual commit, reserve and automatic commit
-* How objects are allocated   - stack, fixed size bins, free list, occupancy list
-
-The first two are the purview of memory allocators. The last is determined by the object allocator.
+# Allocations
+## TODO
+* Allocate exactly what was asked for and let users add the metadata size if desired
+* ScopedAllocation
 
 
 
@@ -101,15 +153,71 @@ A GPU allocator is niche enough that it probably doesn't need to be part of a ge
 # Debug Allocators
 An appealing idea is debug allocators that check for various issues, such as memory leaks, overflow, etc.
 
+## Types
+* Fill patterns
+* Leak check
+* Thread check
+* Overflow
+* Underflow
+* Use after free
+* Lifetime check
+* Sanitizer hooks
+
+## TODO
+* How do we combine headers / support different metadata sizes?
+	1. Two headers
+		Pro: Common case remains ideal (non wrapped allocator)
+		Con: Dependent load
+	2. Fixed / max size header
+		Con: Limits extensibility
+		Con: Wasted space when unused
+	3. CRTP
+		Base allocators know their most derived type
+		Con: All allocators are templates
+	4. Allocator extensibility
+		Type traits to inject additional behavior
+		Con: Probably hard to understand / fragile
+	5. Templated allocator
+		Template options to enable/disable features
+		Pro: Possibly the simplest option. Feels like a good fit.
+		Con: Requires implementation to be in a header.
+			Or, explicit instantiation for all variants?
+	6. Separate allocator types (no wrapping)
+		Con: Some code duplication (fine)
+		Con: Still have to deal with different header sizes (dual header approach?)
+
 ## Allocators or Containers
 The first question is whether the debug checks are part of the allocator or the container. Since we split these concepts and expect almost all allocations to be from a container, that's where we want the debug checks to be performed.
 
 ## Leak Check
 We expect that approximately all allocations go through arenas, which manage the lifetime of all allocations within them as a unit. Thus to check for leaks we need to find the set of active arenas. We can do this by maintaining a list of active arenas. But we expect this type of checking to be less useful because there are far fewer arenas than individual objects. There will be fewer opportunities to create leaks and they will be easier to notice.
 
+Implemented as a linked list of active allocations.
+Where do we store it?
+1. Thread-local storage
+	* How do we handle alloc on one thread and free on another?
+	* Pro: Less waste due to alignment if alignof(Header) > alignof(Node)
+	* Pro: Can have variable stack size
+	* Pro: Potential for stack deduplication (at a performance cost)
+	* Pro: Potential for shared logic (other tracking, such at categorization)
+	* Con: Indirect lookup, not in same cache line
+2. Additional header
+	* Where do we put the head node? TLS?
+	* How do we handle multiple threads touching allocator?
+	* Con: Indirect lookup, but mostly in same cache line
+
 ## Overflow and Underflow
 Overflow and underflow checks can be useful on arenas, but not on arrays. Arrays would need to insert padding between elements, which breaks the expectation that elements are laid out contiguously. This requires the usage code to know about a wrapper struct around elements, or use an indirection that hides this. Neither are desirable.
 
+### Underflow
+Can this be implemented as a wrapper?
+Cannot compose with an overflow allocator (fundamental, can't be aligned to both the beginning and end of a page)
+Cannot compose with arenas (incidental, there's only one real allocation)
+Behavior:
+* Allocate an extra page before each allocation
+* Disallow access to the page
+* Install a fault handler
+* Align each allocation to a page boundary
 
 
 # Wrapping Containers
@@ -135,6 +243,36 @@ Object lifetimes can be started by new (including placement new), unsigned char/
 
 
 # Arenas
+
+## TODO
+* Consider adding a way to release the allocation from the arena
+* Profile branch vs SEH for auto-commit behavior
+* Compare in-line vs out-of-line metadata
+* Handle scoping
+	* Separate type - have to pass the root arena in addition to scopes (or stash it inside each scope)
+	* Separate object - footgun by having two alive at the same time
+* Debugging
+	* Stack tracking
+	* Leak check
+	* Use after free
+	* Overflow
+	* Underflow
+	* Thread check
+	* Fill patterns
+
+## Allocator Interactions
+Arenas have a lot of dependencies on the allocator
+* Block allocator requires a list of blocks
+* Realloc requires a branch to skip relocation
+* Virtual allocator requires a branch to skip relocation
+* Overflow/underflow allocator requires custom offset on objects
+
+
+
+## Nesting
+Can we nest arenas?
+* How do we ensure children end their lifetime before parents?
+* Do arenas need to track their parent? (Debug only?)
 
 ## Metadata
 Metadata is only needed for objects with non-trivial destructors. Metadata is placed before objects when they are pushed into the arena. Only one metadata is needed for an array of objects of the same type. Pushing objects of the same type one-at-a-time will update the existing metadata rather than creating a new one.
@@ -178,6 +316,41 @@ There are multiple ways we could store metadata.
 Copying an allocation seems like a bad idea. It's a footgun to have two allocation structs pointing the same actual allocation.
 The arena needs ownership of the allocation because it commits as needed, which mutates the allocation.
 Moving the allocation avoid duplicating the allocator API on the arena, but it requires move semantics for allocations.
+
+### Transferring Ownership
+* CRTP
+	* Con: Not possible
+* In class
+	* Con: Boilerplate if using manual assignment
+	* Con: Bad error message if using private copy
+	* Con: Visual noise for users
+	* Con: No longer an aggregate
+	* Con: What happens to current allocation?
+* Wrapper
+	* NOTE: Best so far
+	* Con: Requires value is movable
+	* Con: Requires value is default constructible
+	* Con: move(alloc) doesn't clear the allocation
+* In arena
+	* Con: move(alloc) doesn't clear the allocation
+* Arena doesn't take ownership
+	* NOTE: Also pretty good
+	* Con: User can accidentally mutate allocation
+* Arena does the allocation
+	* Con: Duplicate allocator API
+* Kitchen sink
+	* NOTE: Best so far?
+	* Pass in bytes, move in allocation, or do allocation internally
+
+* dtor - assert, but don't free?
+	* Maybe this happens in VirtualAllocator
+	* Arenas should be able to work on any chunk of memory, may not be an allocation
+
+
+
+# Containers
+## Arrays
+Maybe arrays are a special case of arenas?
 
 
 

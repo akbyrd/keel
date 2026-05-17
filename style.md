@@ -10,7 +10,7 @@ The most important guiding principles by far are readability and discoverability
 * Variables       - Camel case  - strView
 * Functions       - Camel case  - toLower
 
-It's important that types and variables do not use the same convention (`File file = ...;`) to avoid name clashes (`File File = ...;`) which would require a prefix to disambiguate (`FFile File = ...;`).
+It's important that types and variables do not use the same convention to avoid name clashes, which would require a prefix to disambiguate (`File file = ...;` vs `FFile File = ...;`).
 
 Do not use Hungarian notation (`b8 bIsDirty`) or prefixes (`m_member`, `kConstant`, `gGlobal`).
 
@@ -32,8 +32,15 @@ Massive files can be bad for iteration, but this problem is less common and is e
 
 
 
+# Documentation File Organization
+* style.md - unique, top level only - Describes the coding style for the codebase
+* docs.md  - per-directory          - Documents the design and behavior of a system. Focuses user-facing details.
+* notes.md - per-directory          - Documents the rationale and implementation of a system. Focuses on implementation details.
+
+
+
 # Headers
-Single blocks of headers, sorted alphabetically. No groups.
+Single block of headers, sorted alphabetically. No groups.
 ```
 // foo.cpp
 
@@ -45,15 +52,40 @@ Single blocks of headers, sorted alphabetically. No groups.
 
 
 
+# Indices
+Indices are signed. This is to avoid unnecessary conversions and reduce the potential for mistakes. No special consideration is needed for reverse loops or subtraction.
+
+Indices are 64 bits. For types that contain a length and a pointer like spans the padding next to a 32-bit index would result in the same total footprint. Types that contain a length, capacity, and pointer will end up 64 bits larger. 32-bit platforms will take a larger hit, but I estimate <5% of relevant CPUs in use in 2026 are 32-bit.
+
+
+
+# Const
+Use logical const, not physical const. Logical const means no mutations may occur anywhere when arguments are const. Functions on const objects are expected to be thread safe. This means const must be treated as transitive, even though it's not enforced by the language. If a const pointer is passed to a function you may not use that pointer to get to a non-const object and mutate it.
+
+`const_cast` and `mutable` are not allowed. Ever.
+```
+struct Foo
+{
+	void Do() const;
+
+	void Do()
+	{
+		const Foo* ConstThis = this;
+		ConstThis->Do();
+	}
+};
+```
+
+
 # Other
 * Tabs for indentation. Spaces for vertical alignment.
+* Vertical alignment is encouraged when it improves readability.
 * clang-tidy entire file when saving.
 * Zero or one function call per line.
 * 120 column soft limit.
 * Single trailing newline in files.
-* Vertical alignment is encouraged when it improves readability.
 * `void*` for "unknown type" and `u8*` for bytes and pointer arithmetic.
-* Separators are encouraged.
+* Separators are encouraged, but keep them simple and consistent.
 	```
 	// ------------------ (up to column limit)
 	// Implementation
