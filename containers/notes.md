@@ -15,18 +15,9 @@
 	* Underflow
 	* Thread check
 	* Fill patterns
-
-## Allocator Interactions
-Arenas have a lot of dependencies on the allocator
-* Block allocator requires a list of blocks
-* Realloc requires a branch to skip relocation
-* Virtual allocator requires a branch to skip relocation
-* Overflow/underflow allocator requires custom offset on objects
-
-## Nesting
-Can we nest arenas?
-* How do we ensure children end their lifetime before parents?
-* Do arenas need to track their parent? (Debug only?)
+* Can we nest arenas?
+	* How do we ensure children end their lifetime before parents?
+	* Do arenas need to track their parent? (Debug only?)
 
 ## Metadata
 Metadata is only needed for objects with non-trivial destructors. Metadata is placed before objects when they are pushed into the arena. Only one metadata is needed for an array of objects of the same type. Pushing objects of the same type one-at-a-time will update the existing metadata rather than creating a new one.
@@ -100,17 +91,16 @@ Moving the allocation avoid duplicating the allocator API on the arena, but it r
 	* Maybe this happens in VirtualAllocator
 	* Arenas should be able to work on any chunk of memory, may not be an allocation
 
+## Allocator Interactions
+Arenas have a lot of dependencies on the allocator
+* Block allocator requires a list of blocks
+* Realloc requires a branch to skip relocation
+* Virtual allocator requires a branch to skip relocation
+* Overflow/underflow allocator requires custom offset on objects
 
+## Usage Patterns
 
-# Containers
-## Arrays
-Maybe arrays are a special case of arenas?
-
-
-
-# Usage Patterns
-
-## Usage Pattern 1
+### Usage Pattern 1
 * Pass by value, free when scope ends
 * Creating scopes should be explicit because copying arenas should not be allowed
 * Scopes must be the same type, otherwise you can't create sub-scopes
@@ -162,7 +152,7 @@ void baz(Arena& a)
 }
 ```
 
-## Usage Pattern 2
+### Usage Pattern 2
 * Scopes are different type
 * Pass arena
 * Create scopes explicitly
@@ -206,7 +196,7 @@ void baz(Arena& arena, ArenaScope& a)
 }
 ```
 
-## Usage Pattern 3
+### Usage Pattern 3
 * Push happens on same object
 * Seems like the best option
 ```cpp
@@ -354,9 +344,14 @@ void baz(Context& ctx)
 }
 ```
 
-
-
-# References
+## References
 https://www.rfleury.com/p/enter-the-arena-talk
 Arenas are each a stack.
 Functions accept arena as parameter.
+
+
+
+# Arrays
+
+## TODO
+* Maybe arrays are a special case of arenas?
