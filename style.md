@@ -32,21 +32,31 @@ Massive files can be bad for iteration, but this problem is less common and is e
 
 
 
-# Documentation File Organization
-* style.md - unique, top level only - Describes the coding style for the codebase
-* docs.md  - per-directory          - Documents the design and behavior of a system. Focuses user-facing details.
-* notes.md - per-directory          - Documents the rationale and implementation of a system. Focuses on implementation details.
+# Documentation
+* Every function must be documented.
+* Explicitly document all assumptions and limitations.
+* Use [Doxygen comment syntax](https://www.doxygen.nl/manual/commands.html)
+	* Use `///`, not `/** */`
+	* Use `@tag`, not `\tag`
+	* Use ` ```cpp <code>``` `, not `\code <code> \endcode`
+	* Documentation goes on declarations, not definitions
+	* Use `@file` comments where useful
+	* Use these special files when useful:
+		* style.md - unique, top level only - Describes the coding style for the entire codebase.
+		* docs.md  - per-directory          - Documents the design and behavior of a system. Focuses user-facing details.
+		* notes.md - per-directory          - Documents the rationale and implementation of a system. Focuses on implementation details.
 
 
 
 # Headers
 Single block of headers, sorted alphabetically. No groups.
-```
+```cpp
 // foo.cpp
 
 #include "core/bar.hpp"
 #include "core/baz.hpp"
 #include "core/foo.hpp"
+#include <ext/dependency.hpp>
 #include <cstdint>
 ```
 
@@ -63,7 +73,7 @@ Indices are 64 bits. For types that contain a length and a pointer like spans th
 Use logical const, not physical const. Logical const means no mutations may occur anywhere when arguments are const. Functions on const objects are expected to be thread safe. This means const must be treated as transitive, even though it's not enforced by the language. If a const pointer is passed to a function you may not use that pointer to get to a non-const object and mutate it.
 
 `const_cast` and `mutable` are not allowed. Ever.
-```
+```cpp
 struct Foo
 {
 	void Do() const;
@@ -86,12 +96,12 @@ struct Foo
 * Single trailing newline in files.
 * `void*` for "unknown type" and `u8*` for bytes and pointer arithmetic.
 * Separators are encouraged, but keep them simple and consistent.
-	```
+	```cpp
 	// ------------------ (up to column limit)
 	// Implementation
 	```
 * Wrap each function argument onto a new line when they don't fit on one line.
-	```
+	```cpp
 	void Foo(
 		One one,
 		Two two,

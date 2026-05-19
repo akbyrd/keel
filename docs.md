@@ -5,7 +5,7 @@ Explicitness is always preferred over implicitness. Allocations are never hidden
 
 Robustness in the face of all possible edge cases is not a goal. When in tension with our other goals, robustness is sacrificed. The library will attempt to cover all cases up until the complexity-to-functionality ratio becomes (subjectively) unfavorable. That said, limitations should not be a result of carelessness. All edge cases are expected to be carefully considered and a value judgement applied based on the cost-benefit ratio. All limitations will be explicitly documented.
 
-While this codebase is decided not "modern C++", we do use newer features where they enable our goals instead of older, more complicated solutions. Examples include concepts (instead of SFINAE), constexpr (instead of template metaprogramming), deducing this (instead of overload sets), and modules (to improve compile time).
+While this codebase is decided not "modern C++", we do use newer features where they enable our goals instead of older, more complicated solutions. Examples include constraints (instead of SFINAE), constexpr (instead of template metaprogramming), deducing this (instead of overload sets), contracts (to document pre and post conditions), and modules (to improve compile time).
 
 
 
