@@ -1,9 +1,9 @@
 #pragma once
 
 #include "containers/span.hpp"
+#include "core/math.hpp"
 #include "memory/lifetime.hpp"
 
-#if false
 struct TypeId
 {
 	u32 val;
@@ -18,17 +18,16 @@ constexpr TypeId id = []()
 	// What stability properties are required?
 	// Seed with local path? Project name? Custom?
 	static constinit u32 count = 0;
-	static_assert(count < u32(-2));
-	return { ++count };
+	assert(count < maxVal<u32>);
+	return TypeId { ++count };
 }();
-#endif
 
 template <typename T>
 struct TypeInfo
 {
-	//static constexpr u32 id = id<T>;
+	static constexpr u32 id    = ::id<T>;
 	static constexpr u32 align = alignof(T); // TODO: Might need to be signed for mismatches
-	static constexpr u64 size = sizeof(T); // TODO: Might need to be signed for mismatches
+	static constexpr u64 size  = sizeof(T);  // TODO: Might need to be signed for mismatches
 
 	// TODO: Overloads are awkward here
 	using DefaultConstructFn = void(Span<T> dst);
