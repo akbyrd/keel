@@ -14,6 +14,6 @@ enum class Platform : u8
 
 #include "core/platform.win32.hpp" // IWYU pragma: export
 
-#if !defined(BLD_PLATFORM_WIN32)
+#if !BLD_PLATFORM_WIN32
 	#error "Unsupported platform"
 #endif

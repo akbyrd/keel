@@ -7,6 +7,7 @@
 #undef  BLD_COMPILER_CLANG
 #define BLD_COMPILER_CLANG true
 
+// The compiler that is currently being used.
 constexpr Compiler compiler = Compiler::clang;
 
 #endif

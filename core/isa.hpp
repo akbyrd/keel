@@ -12,6 +12,6 @@ enum class ISA : u8
 
 #include "core/isa.x64.hpp" // IWYU pragma: export
 
-#if !defined(BLD_ISA_X64)
+#if !BLD_ISA_X64
 	#error "Unsupported instruction set"
 #endif

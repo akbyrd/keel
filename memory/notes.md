@@ -183,6 +183,7 @@ Implemented as a linked list of active allocations.
 Where do we store it?
 1. Thread-local storage
 	* How do we handle alloc on one thread and free on another?
+		* Check current thread id, synchronize only when on a different thread, steal free list entries from other threads
 	* Pro: Less waste due to alignment if alignof(Header) > alignof(Node)
 	* Pro: Can have variable stack size
 	* Pro: Potential for stack deduplication (at a performance cost)
