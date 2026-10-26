@@ -2,7 +2,7 @@
 
 #include "core/platform.hpp"
 
-#if BLD_PLATFORM_WIN32
+#if KL_PLATFORM_WIN32
 
 #include "core/math.hpp"
 #include "core/win32.hpp"

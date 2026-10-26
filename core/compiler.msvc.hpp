@@ -4,8 +4,8 @@
 
 #include "core/compiler.hpp"
 
-#undef  BLD_COMPILER_MSVC
-#define BLD_COMPILER_MSVC true
+#undef  KL_COMPILER_MSVC
+#define KL_COMPILER_MSVC true
 
 constexpr Compiler compiler = Compiler::msvc;
 

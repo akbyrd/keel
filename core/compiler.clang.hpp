@@ -4,8 +4,8 @@
 
 #include "core/compiler.hpp"
 
-#undef  BLD_COMPILER_CLANG
-#define BLD_COMPILER_CLANG true
+#undef  KL_COMPILER_CLANG
+#define KL_COMPILER_CLANG true
 
 constexpr Compiler compiler = Compiler::clang;
 

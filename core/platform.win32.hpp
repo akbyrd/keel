@@ -4,8 +4,8 @@
 
 #include "core/platform.hpp"
 
-#undef  BLD_PLATFORM_WIN32
-#define BLD_PLATFORM_WIN32 true
+#undef  KL_PLATFORM_WIN32
+#define KL_PLATFORM_WIN32 true
 
 constexpr Platform platform = Platform::win32;
 

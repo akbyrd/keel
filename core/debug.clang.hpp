@@ -2,7 +2,7 @@
 
 #include "core/compiler.hpp"
 
-#if BLD_COMPILER_CLANG
+#if KL_COMPILER_CLANG
 
 #include "core/debug.hpp"
 

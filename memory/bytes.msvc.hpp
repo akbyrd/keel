@@ -2,7 +2,7 @@
 
 #include "core/compiler.hpp"
 
-#if BLD_COMPILER_MSVC
+#if KL_COMPILER_MSVC
 
 #include "core/traits.hpp"
 #include "memory/bytes.hpp"
