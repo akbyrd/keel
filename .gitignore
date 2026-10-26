@@ -1,0 +1,16 @@
+# All generated, derived, and downloaded files
+/cache/
+
+# Dedicated space for local files
+/local/
+
+# VS Code local settings
+.vscode
+
+# Clangd local settings
+.clangd
+compile_flags.txt
+
+# MSVC local settings
+build/msvc/.vs/
+build/msvc/*.user

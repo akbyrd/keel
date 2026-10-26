@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\containers\docs.md" />
+    <None Include="..\..\containers\notes.md" />
+    <None Include="..\..\docs.md" />
+    <None Include="..\..\memory\docs.md" />
+    <None Include="..\..\memory\notes.md" />
+    <None Include="..\..\notes.md" />
+    <None Include="..\..\style.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\containers\arena.hpp" />
+    <ClInclude Include="..\..\containers\span.hpp" />
+    <ClInclude Include="..\..\containers\string-view.hpp" />
+    <ClInclude Include="..\..\core\compiler.clang-cl.hpp" />
+    <ClInclude Include="..\..\core\compiler.clang.hpp" />
+    <ClInclude Include="..\..\core\compiler.hpp" />
+    <ClInclude Include="..\..\core\compiler.msvc.hpp" />
+    <ClInclude Include="..\..\core\debug.clang.hpp" />
+    <ClInclude Include="..\..\core\debug.hpp" />
+    <ClInclude Include="..\..\core\debug.msvc.hpp" />
+    <ClInclude Include="..\..\core\isa.hpp" />
+    <ClInclude Include="..\..\core\isa.x64.hpp" />
+    <ClInclude Include="..\..\core\math.hpp" />
+    <ClInclude Include="..\..\core\math.win32.hpp" />
+    <ClInclude Include="..\..\core\meta.hpp" />
+    <ClInclude Include="..\..\core\platform.hpp" />
+    <ClInclude Include="..\..\core\platform.win32.hpp" />
+    <ClInclude Include="..\..\core\traits.hpp" />
+    <ClInclude Include="..\..\core\types.hpp" />
+    <ClInclude Include="..\..\core\win32.hpp" />
+    <ClInclude Include="..\..\memory\allocator.hpp" />
+    <ClInclude Include="..\..\memory\bytes.hpp" />
+    <ClInclude Include="..\..\memory\bytes.msvc.hpp" />
+    <ClInclude Include="..\..\memory\lifetime.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\memory\allocator.win32.cpp" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <ProjectGuid>{63E907A3-C550-2BE9-C347-50501F665218}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)..\..\cache\build\windows-$(Platform)-$(Configuration)-msvc\$(ProjectName)\bin\</OutDir>
+    <IntDir>$(SolutionDir)..\..\cache\build\windows-$(Platform)-$(Configuration)-msvc\$(ProjectName)\obj\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)..\..\cache\build\windows-$(Platform)-$(Configuration)-msvc\$(ProjectName)\bin\</OutDir>
+    <IntDir>$(SolutionDir)..\..\cache\build\windows-$(Platform)-$(Configuration)-msvc\$(ProjectName)\obj\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <WarningLevel>Level4</WarningLevel>
+      <AdditionalIncludeDirectories>..\..</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalOptions>/J %(AdditionalOptions)</AdditionalOptions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <WarningLevel>Level4</WarningLevel>
+      <AdditionalIncludeDirectories>..\..</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalOptions>/J %(AdditionalOptions)</AdditionalOptions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

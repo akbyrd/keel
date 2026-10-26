@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 18
+VisualStudioVersion = 18.3.11520.95 d18.3
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "keel", "keel.vcxproj", "{63E907A3-C550-2BE9-C347-50501F665218}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{63E907A3-C550-2BE9-C347-50501F665218}.Debug|x64.ActiveCfg = Debug|x64
+		{63E907A3-C550-2BE9-C347-50501F665218}.Debug|x64.Build.0 = Debug|x64
+		{63E907A3-C550-2BE9-C347-50501F665218}.Release|x64.ActiveCfg = Release|x64
+		{63E907A3-C550-2BE9-C347-50501F665218}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4E024243-578A-4A6B-A6D3-10B7B0352D7D}
+	EndGlobalSection
+EndGlobal
