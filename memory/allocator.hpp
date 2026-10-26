@@ -39,9 +39,6 @@ struct VirtualAllocator
 // -------------------------------------------------------------------------------------------------
 // Implementation
 
-// TODO: This will conflict with <new>
-constexpr void* operator new(u64, void* x) { return x; }
-
 static_assert(sizeof(Allocation) == sizeof(Allocation::bytes));
 static_assert(isTriviallyDestructible<Allocation>);
 static_assert(isTriviallyConstructible<Allocation>);

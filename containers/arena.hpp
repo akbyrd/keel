@@ -191,7 +191,7 @@ Arena::pushArray(i64 count, NoInit)
 			Meta& meta = metas[0];
 			// TODO: Compare
 			//construct(meta, {
-			new (&meta) Meta {
+			new (&meta, PlacementTag{}) Meta {
 				.id       = TypeInfo<T>::id,
 				.size     = TypeInfo<T>::size,
 				.offset   = dst - alloc.bytes.data, // TODO: RelPtr?

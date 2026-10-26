@@ -7,6 +7,10 @@
 // -------------------------------------------------------------------------------------------------
 // Interface
 
+struct PlacementTag {};
+inline void* operator new   (u64, void* x, PlacementTag) { return x; }
+inline void  operator delete(void*, void*, PlacementTag) {}
+
 // TODO: Prevent move on const&
 template <typename T> constexpr removeRef<T>&& move(T&& x);
 template <typename T> constexpr MoveSpan<T> move(Span<T> x);
@@ -87,14 +91,14 @@ template <typename T, typename... Args>
 constexpr void
 construct(T& dst, Args&& ...args)
 {
-	new (&dst) T { forward(args)... };
+	new (&dst, PlacementTag{}) T { forward(args)... };
 }
 
 template <typename T, typename... Args>
 constexpr void
 construct(Span<T> dst, Args&& ...args)
 {
-	new (&dst.data[0]) T { forward(args)... };
+	new (&dst.data[0], PlacementTag{}) T { forward(args)... };
 	for (i64 i = 1; i < dst.len; ++i)
 		dst.data[i] = dst.data[0];
 }
@@ -103,28 +107,28 @@ template <typename T>
 constexpr void
 defaultConstruct(T& dst)
 {
-	new (&dst) T;
+	new (&dst, PlacementTag{}) T;
 }
 
 template <typename T>
 constexpr void
 defaultConstruct(Span<T> dst)
 {
-	new (dst.data) T[dst.len];
+	new (dst.data, PlacementTag{}) T[dst.len];
 }
 
 template <typename T>
 constexpr void
 valueConstruct(T& dst)
 {
-	new (&dst) T {};
+	new (&dst, PlacementTag{}) T {};
 }
 
 template <typename T>
 constexpr void
 valueConstruct(Span<T> dst)
 {
-	new (dst.data) T[dst.len] {};
+	new (dst.data, PlacementTag{}) T[dst.len] {};
 }
 
 template <typename T>
@@ -132,7 +136,7 @@ constexpr void
 copyConstruct(T& dst, const T& src)
 {
 	assert(&dst != src);
-	new (&dst) T { src };
+	new (&dst, PlacementTag{}) T { src };
 }
 
 template <typename T>
@@ -140,7 +144,7 @@ constexpr void
 copyConstruct(Span<T> dst, const T& src)
 {
 	assert(!dst.overlaps(src));
-	new (dst.data) T[dst.len] { src };
+	new (dst.data, PlacementTag{}) T[dst.len] { src };
 }
 
 // TODO: Is this correct? (check all type traits in this file)
@@ -157,7 +161,7 @@ copyConstruct(Span<T> dst, Span<const T> src)
 		assert(!dst.overlaps(src));
 
 		for (i64 i = 0; i < src.len; ++i)
-			new (&dst.data[i]) T { src.data[i] };
+			new (&dst.data[i], PlacementTag{}) T { src.data[i] };
 	}
 }
 
@@ -168,7 +172,7 @@ moveConstruct(T& dst, T&& src)
 	assert(&dst != &src);
 
 	// TODO: move or forward?
-	new (&dst) T { move(src) };
+	new (&dst, PlacementTag{}) T { move(src) };
 }
 
 template <typename T>
@@ -178,9 +182,9 @@ moveConstruct(Span<T> dst, T&& src)
 	assert(!dst.overlaps(src));
 
 	// TODO: move or forward?
-	new (dst.data) T { move(src) };
+	new (dst.data, PlacementTag{}) T { move(src) };
 	if (dst.len > 1)
-		new (&dst.data[1]) T[dst.len - 1] { dst.data[0] };
+		new (&dst.data[1], PlacementTag{}) T[dst.len - 1] { dst.data[0] };
 }
 
 // TODO: Is this correct? (check all type traits in this file)
@@ -201,7 +205,7 @@ moveConstruct(Span<T> dst, MoveSpan<T> src)
 
 		for (i64 i = 0; i < src.len; ++i)
 			// TODO: move or forward?
-			new (&dst.data[i]) T { move(src.data[i]) };
+			new (&dst.data[i], PlacementTag{}) T { move(src.data[i]) };
 	}
 }
 

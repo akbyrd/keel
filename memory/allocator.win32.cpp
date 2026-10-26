@@ -121,7 +121,7 @@ VirtualAllocator::reserve(i64 reserve, i64 commit, u8 align)
 	}
 
 	u8* allocBytes = static_cast<u8*>(allocData);
-	auto& header = *new (allocBytes + headerOffset) Header {};
+	auto& header = *new (allocBytes + headerOffset, PlacementTag{}) Header {};
 	header = Header {
 		.typeId       = typeId,
 		.headerOffset = u8(headerOffset),
