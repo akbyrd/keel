@@ -23,7 +23,6 @@ using c8  = char;
 // -------------------------------------------------------------------------------------------------
 // Tests
 
-#include "traits.hpp"
 #include <climits>
 
 static_assert(sizeof(u8) == 1);

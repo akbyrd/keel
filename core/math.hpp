@@ -160,40 +160,40 @@ constexpr T* alignDown(T* x)
 	return result;
 }
 
-template <> constexpr u8  minVal<u8>  = 0;
-template <> constexpr u16 minVal<u16> = 0;
-template <> constexpr u32 minVal<u32> = 0;
-template <> constexpr u64 minVal<u64> = 0;
-template <> constexpr i8  minVal<i8>  = static_cast<i8>(0x80);
-template <> constexpr i16 minVal<i16> = static_cast<i16>(0x8000);
-template <> constexpr i32 minVal<i32> = 0x8000'0000;
-template <> constexpr i64 minVal<i64> = 0x8000'0000'0000'0000;
-template <> constexpr f32 minVal<f32> = f32(0xFF7F'FFFF);
-template <> constexpr f64 minVal<f64> = f64(0xFFEF'FFFF'FFFF'FFFF);
-template <> constexpr c8  minVal<c8>  = isSigned<c8> ? static_cast<c8>(0x80) : 0;
+template <> constexpr inline u8  minVal<u8>  = 0;
+template <> constexpr inline u16 minVal<u16> = 0;
+template <> constexpr inline u32 minVal<u32> = 0;
+template <> constexpr inline u64 minVal<u64> = 0;
+template <> constexpr inline i8  minVal<i8>  = static_cast<i8>(0x80);
+template <> constexpr inline i16 minVal<i16> = static_cast<i16>(0x8000);
+template <> constexpr inline i32 minVal<i32> = 0x8000'0000;
+template <> constexpr inline i64 minVal<i64> = 0x8000'0000'0000'0000;
+template <> constexpr inline f32 minVal<f32> = f32(0xFF7F'FFFF);
+template <> constexpr inline f64 minVal<f64> = f64(0xFFEF'FFFF'FFFF'FFFF);
+template <> constexpr inline c8  minVal<c8>  = isSigned<c8> ? static_cast<c8>(0x80) : 0;
 
-template <> constexpr u8  maxVal<u8>  = 0xFF;
-template <> constexpr u16 maxVal<u16> = 0xFFFF;
-template <> constexpr u32 maxVal<u32> = 0xFFFF'FFFF;
-template <> constexpr u64 maxVal<u64> = 0xFFFF'FFFF'FFFF'FFFF;
-template <> constexpr i8  maxVal<i8>  = 0x7F;
-template <> constexpr i16 maxVal<i16> = 0x7FFF;
-template <> constexpr i32 maxVal<i32> = 0x7FFF'FFFF;
-template <> constexpr i64 maxVal<i64> = 0x7FFF'FFFF'FFFF'FFFF;
-template <> constexpr f32 maxVal<f32> = f32(0x7F7F'FFFF);
-template <> constexpr f64 maxVal<f64> = f64(0x7FEF'FFFF'FFFF'FFFF);
-template <> constexpr c8  maxVal<c8>  = isSigned<c8> ? 0x7F : 0xFF;
+template <> constexpr inline u8  maxVal<u8>  = 0xFF;
+template <> constexpr inline u16 maxVal<u16> = 0xFFFF;
+template <> constexpr inline u32 maxVal<u32> = 0xFFFF'FFFF;
+template <> constexpr inline u64 maxVal<u64> = 0xFFFF'FFFF'FFFF'FFFF;
+template <> constexpr inline i8  maxVal<i8>  = 0x7F;
+template <> constexpr inline i16 maxVal<i16> = 0x7FFF;
+template <> constexpr inline i32 maxVal<i32> = 0x7FFF'FFFF;
+template <> constexpr inline i64 maxVal<i64> = 0x7FFF'FFFF'FFFF'FFFF;
+template <> constexpr inline f32 maxVal<f32> = f32(0x7F7F'FFFF);
+template <> constexpr inline f64 maxVal<f64> = f64(0x7FEF'FFFF'FFFF'FFFF);
+template <> constexpr inline c8  maxVal<c8>  = isSigned<c8> ? 0x7F : 0xFF;
 
 // TODO: Consider a "make float" function
-template <> constexpr f32 smallestVal<f32> = 0x0080'0000;
-template <> constexpr f64 smallestVal<f64> = 0x0010'0000'0000'0000;
+template <> constexpr inline f32 smallestVal<f32> = 0x0080'0000;
+template <> constexpr inline f64 smallestVal<f64> = 0x0010'0000'0000'0000;
 
-template <> constexpr f32 pi<f32>          = 3.14159265358979323f;
-template <> constexpr f64 pi<f64>          = 3.14159265358979323;
-template <> constexpr f32 tau<f32>         = 6.28318530717958647f;
-template <> constexpr f64 tau<f64>         = 6.28318530717958647;
-template <> constexpr f32 goldenRatio<f32> = 1.61803398874989484f;
-template <> constexpr f64 goldenRatio<f64> = 1.61803398874989484;
+template <> constexpr inline f32 pi<f32>          = 3.14159265358979323f;
+template <> constexpr inline f64 pi<f64>          = 3.14159265358979323;
+template <> constexpr inline f32 tau<f32>         = 6.28318530717958647f;
+template <> constexpr inline f64 tau<f64>         = 6.28318530717958647;
+template <> constexpr inline f32 goldenRatio<f32> = 1.61803398874989484f;
+template <> constexpr inline f64 goldenRatio<f64> = 1.61803398874989484;
 
 #include "core/math.win32.hpp" // IWYU pragma: export
 
