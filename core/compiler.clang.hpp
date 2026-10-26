@@ -7,6 +7,11 @@
 #undef  KL_COMPILER_CLANG
 #define KL_COMPILER_CLANG true
 
+namespace kl
+{
+
 constexpr Compiler compiler = Compiler::clang;
+
+}
 
 #endif

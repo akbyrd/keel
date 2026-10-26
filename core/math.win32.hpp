@@ -7,6 +7,9 @@
 #include "core/math.hpp"
 #include <intrin.h>
 
+namespace kl
+{
+
 template <typename T>
 	requires (isUnsigned<T>)
 constexpr u8 countSetBits(T x)
@@ -54,10 +57,15 @@ constexpr u8 countSetBits(T x)
 	}
 }
 
+}
+
 #endif
 
 // -------------------------------------------------------------------------------------------------
 // Tests
+
+namespace kl
+{
 
 static constexpr b8
 test_countSetBits()
@@ -102,4 +110,6 @@ test_countSetBits()
 
 	return true;
 	#undef TEST
+}
+
 }

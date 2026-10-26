@@ -2,6 +2,9 @@
 
 #include "containers/span.hpp"
 
+namespace kl
+{
+
 // TODO:
 //                   Alloc Null String
 // CString         - Yes   Yes  Yes
@@ -60,3 +63,5 @@ struct CStringView
 
 	constexpr const c8& operator[](i64 x) const { return data[x]; }
 };
+
+}

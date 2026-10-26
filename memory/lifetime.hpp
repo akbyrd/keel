@@ -7,9 +7,8 @@
 // -------------------------------------------------------------------------------------------------
 // Interface
 
-struct PlacementTag {};
-inline void* operator new   (u64, void* x, PlacementTag) { return x; }
-inline void  operator delete(void*, void*, PlacementTag) {}
+namespace kl
+{
 
 // TODO: Prevent move on const&
 template <typename T> constexpr removeRef<T>&& move(T&& x);
@@ -42,8 +41,18 @@ template <typename T> constexpr void destruct(Span<T> dst);
 template <typename T> constexpr void relocate(T& dst, T&& src);
 template <typename T> constexpr void relocate(Span<T> dst, MoveSpan<T> src);
 
+struct PlacementTag {};
+
+}
+
+inline void* operator new   (kl::u64, void* x, kl::PlacementTag) { return x; }
+inline void  operator delete(void*, void*, kl::PlacementTag) {}
+
 // -------------------------------------------------------------------------------------------------
 // Implementation
+
+namespace kl
+{
 
 template <typename T>
 constexpr removeRef<T>&&
@@ -340,4 +349,6 @@ relocate(Span<T> dst, MoveSpan<T> src)
 		dst.data[i] = move(src.data[i]);
 		destruct(src.data[i]);
 	}
+}
+
 }

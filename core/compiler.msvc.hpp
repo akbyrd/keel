@@ -7,6 +7,11 @@
 #undef  KL_COMPILER_MSVC
 #define KL_COMPILER_MSVC true
 
+namespace kl
+{
+
 constexpr Compiler compiler = Compiler::msvc;
+
+}
 
 #endif

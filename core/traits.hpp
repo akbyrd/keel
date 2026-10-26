@@ -2,6 +2,9 @@
 
 #include "core/types.hpp"
 
+namespace kl
+{
+
 template <typename T> struct _removeC                   { using Type = T; };
 template <typename T> struct _removeC<const T>          { using Type = T; };
 template <typename T> using removeC = typename _removeC<T>::Type;
@@ -141,3 +144,5 @@ negation
 //__builtin_addressof(_Val)
 //__builtin_bit_cast(_To, _Val)
 //__underlying_type(_Ty)
+
+}

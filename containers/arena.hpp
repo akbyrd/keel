@@ -8,6 +8,9 @@
 // -------------------------------------------------------------------------------------------------
 // Interface
 
+namespace kl
+{
+
 // TODO: Is tag dispatch the best approach?
 // TODO: Rename?
 struct NoInit {};
@@ -51,8 +54,13 @@ struct Arena
 	// TODO: overhead (arena, allocator, total)
 };
 
+}
+
 // -------------------------------------------------------------------------------------------------
 // Implementation
+
+namespace kl
+{
 
 // TODO: Pack
 struct Arena::Meta
@@ -271,4 +279,6 @@ Arena::pushArray(MoveSpan<T> values)
 	Span<T> x = pushArray<T>(values.len, NoInit {});
 	moveConstruct(x, values);
 	return x;
+}
+
 }

@@ -4,6 +4,9 @@
 #include "core/math.hpp"
 #include "memory/lifetime.hpp"
 
+namespace kl
+{
+
 struct TypeId
 {
 	u32 val;
@@ -25,44 +28,46 @@ constexpr TypeId id = []()
 template <typename T>
 struct TypeInfo
 {
-	static constexpr u32 id    = ::id<T>;
+	static constexpr u32 id    = kl::id<T>;
 	static constexpr u32 align = alignof(T); // TODO: Might need to be signed for mismatches
 	static constexpr u64 size  = sizeof(T);  // TODO: Might need to be signed for mismatches
 
 	// TODO: Overloads are awkward here
 	using DefaultConstructFn = void(Span<T> dst);
-	static constexpr DefaultConstructFn* defaultConstruct = &::defaultConstruct<T>;
+	static constexpr DefaultConstructFn* defaultConstruct = &kl::defaultConstruct<T>;
 
 	using ValueConstructFn = void(Span<T> dst);
-	static constexpr ValueConstructFn* valueConstruct = &::valueConstruct<T>;
+	static constexpr ValueConstructFn* valueConstruct = &kl::valueConstruct<T>;
 
 	using CopyConstruct1Fn = void(Span<T> dst, const T& src);
-	static constexpr CopyConstruct1Fn* copyConstruct1 = &::copyConstruct<T>;
+	static constexpr CopyConstruct1Fn* copyConstruct1 = &kl::copyConstruct<T>;
 
 	using CopyConstructFn = void(Span<T> dst, Span<const T> src);
-	static constexpr CopyConstructFn* copyConstruct = &::copyConstruct<T>;
+	static constexpr CopyConstructFn* copyConstruct = &kl::copyConstruct<T>;
 
 	using MoveConstruct1Fn = void(Span<T> dst, T&& src);
-	static constexpr MoveConstruct1Fn* moveConstruct1 = &::moveConstruct<T>;
+	static constexpr MoveConstruct1Fn* moveConstruct1 = &kl::moveConstruct<T>;
 
 	using MoveConstructFn = void(Span<T> dst, Span<T> src);
-	static constexpr MoveConstructFn* moveConstruct = &::moveConstruct<T>;
+	static constexpr MoveConstructFn* moveConstruct = &kl::moveConstruct<T>;
 
 	using DestructFn = void(Span<T> dst);
-	static constexpr DestructFn* destruct = &::destruct<T>;
+	static constexpr DestructFn* destruct = &kl::destruct<T>;
 
 	using RelocateFn = void(Span<T> dst, Span<T> src);
-	static constexpr RelocateFn* relocate = &::relocate<T>;
+	static constexpr RelocateFn* relocate = &kl::relocate<T>;
 
 	using CopyAssign1Fn = void(Span<T> dst, const T& src);
-	static constexpr CopyAssign1Fn* copyAssign1 = &::copyAssign<T>;
+	static constexpr CopyAssign1Fn* copyAssign1 = &kl::copyAssign<T>;
 
 	using CopyAssignFn = void(Span<T> dst, Span<const T> src);
-	static constexpr CopyAssignFn* copyAssign = &::copyAssign<T>;
+	static constexpr CopyAssignFn* copyAssign = &kl::copyAssign<T>;
 
 	using MoveAssign1Fn = void(Span<T> dst, T&& src);
-	static constexpr MoveAssign1Fn* moveAssign1 = &::moveAssign<T>;
+	static constexpr MoveAssign1Fn* moveAssign1 = &kl::moveAssign<T>;
 
 	using MoveAssignFn = void(Span<T> dst, Span<T> src);
-	static constexpr MoveAssignFn* moveAssign = &::moveAssign<T>;
+	static constexpr MoveAssignFn* moveAssign = &kl::moveAssign<T>;
 };
+
+}

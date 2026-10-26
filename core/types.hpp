@@ -3,6 +3,9 @@
 // TODO: Try to remove this
 #include <cstdint>
 
+namespace kl
+{
+
 // TODO: Is uint8_t guaranteed to be unsigned char / std::byte / compatible with lifetime operations?
 using u8  = uint8_t;
 using u16 = uint16_t;
@@ -20,10 +23,16 @@ using f64 = double;
 using b8  = bool;
 using c8  = char;
 
+}
+
+
 // -------------------------------------------------------------------------------------------------
 // Tests
 
 #include <climits>
+
+namespace kl
+{
 
 static_assert(sizeof(u8) == 1);
 static_assert(sizeof(u16) == 2);
@@ -41,3 +50,5 @@ static_assert(sizeof(f64) == 8);
 static_assert(sizeof(b8) == 1);
 static_assert(sizeof(c8) == 1);
 static_assert(CHAR_BIT == 8);
+
+}

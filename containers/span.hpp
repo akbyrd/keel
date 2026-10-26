@@ -6,6 +6,9 @@
 // -------------------------------------------------------------------------------------------------
 // Interface
 
+namespace kl
+{
+
 // TODO: Can we separate the concepts of ownership and containers?
 // TODO: Consider renaming to View
 // More versatile - string view vs string span
@@ -71,8 +74,13 @@ struct MoveSpan : Span<T>
 	constexpr const T& operator[] (i64 x) const;
 };
 
+}
+
 // -------------------------------------------------------------------------------------------------
 // Implementation
+
+namespace kl
+{
 
 //template <typename T>
 //Span(const T&) -> Span<const T>;
@@ -295,4 +303,6 @@ MoveSpan<T>::operator[] (i64 x)
 	using Base = Span<T>;
 	assert(x < Base::len);
 	return move(Base::data[x]);
+}
+
 }

@@ -12,6 +12,11 @@
 #undef  KL_ISA_X64
 #define KL_ISA_X64 true
 
+namespace kl
+{
+
 constexpr ISA isa = ISA::x64;
+
+}
 
 #endif

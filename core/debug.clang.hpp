@@ -6,6 +6,9 @@
 
 #include "core/debug.hpp"
 
+namespace kl
+{
+
 constexpr void assert(b8 condition)
 {
 	if (!condition)
@@ -18,6 +21,8 @@ constexpr void assert(b8 condition)
 constexpr void debugBreak()
 {
 	__builtin_debugtrap();
+}
+
 }
 
 #endif

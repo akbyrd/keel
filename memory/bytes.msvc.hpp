@@ -7,6 +7,9 @@
 #include "core/traits.hpp"
 #include "memory/bytes.hpp"
 
+namespace kl
+{
+
 extern "C"
 {
 	void* __cdecl memcpy(void*, const void*, u64);
@@ -87,6 +90,8 @@ moveBytes(Span<u8> dst, Span<u8> src)
 		assert(src.data);
 		memmove(dst.data, src.data, src.len);
 	}
+}
+
 }
 
 #endif

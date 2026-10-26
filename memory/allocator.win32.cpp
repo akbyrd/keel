@@ -8,6 +8,9 @@
 #include "core/win32.hpp"
 #include "memory/allocator.hpp"
 
+namespace kl
+{
+
 namespace AllocatorInternal
 {
 	static inline constexpr u16 typeId           = 0xA11C;
@@ -173,6 +176,8 @@ VirtualAllocator::getReserved(const Allocation& alloc)
 
 	const Header& header = getHeader(alloc);
 	return header.reserved;
+}
+
 }
 
 #endif

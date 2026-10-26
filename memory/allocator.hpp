@@ -6,6 +6,9 @@
 // -------------------------------------------------------------------------------------------------
 // Interface
 
+namespace kl
+{
+
 // NOTE: Allocations may be larger than requested by up to a page.
 
 constexpr u64 Kilobyte = 1024;
@@ -36,8 +39,13 @@ struct VirtualAllocator
 	static i64        getReserved (const Allocation& alloc);
 };
 
+}
+
 // -------------------------------------------------------------------------------------------------
 // Implementation
+
+namespace kl
+{
 
 static_assert(sizeof(Allocation) == sizeof(Allocation::bytes));
 static_assert(isTriviallyDestructible<Allocation>);
@@ -64,4 +72,6 @@ Allocation::operator=(Allocation&& x)
 	*this = x;
 	valueConstruct(x);
 	return *this;
+}
+
 }

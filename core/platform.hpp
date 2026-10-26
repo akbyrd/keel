@@ -2,6 +2,9 @@
 
 #include "core/types.hpp"
 
+namespace kl
+{
+
 enum class Platform : u8
 {
 	win32,
@@ -9,8 +12,11 @@ enum class Platform : u8
 
 // TODO: Passed in by build system? (Generate it)
 
-#define KL_PLATFORM_WIN32 false
 //constexpr Platform platform;
+
+}
+
+#define KL_PLATFORM_WIN32 false
 
 #include "core/platform.win32.hpp" // IWYU pragma: export
 

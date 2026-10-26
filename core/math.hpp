@@ -6,6 +6,9 @@
 // -------------------------------------------------------------------------------------------------
 // Interface
 
+namespace kl
+{
+
 // TODO: Test negative integers
 // TODO: Test integer promotion
 // TODO: Test and document special cases (NaN, Inf, inverted bounds, overflow, underflow, etc)
@@ -35,8 +38,13 @@ template <typename T> requires (isFloatingPoint<T>) constexpr T pi;
 template <typename T> requires (isFloatingPoint<T>) constexpr T tau;
 template <typename T> requires (isFloatingPoint<T>) constexpr T goldenRatio;
 
+}
+
 // -------------------------------------------------------------------------------------------------
 // Implementation
+
+namespace kl
+{
 
 // NOTE: Zero is not a power of 2
 template <typename T>
@@ -195,12 +203,18 @@ template <> constexpr inline f64 tau<f64>         = 6.28318530717958647;
 template <> constexpr inline f32 goldenRatio<f32> = 1.61803398874989484f;
 template <> constexpr inline f64 goldenRatio<f64> = 1.61803398874989484;
 
+}
+
 #include "core/math.win32.hpp" // IWYU pragma: export
 
 // -------------------------------------------------------------------------------------------------
 // Tests
 
 #if false
+
+namespace kl
+{
+
 static_assert(alignUp<int>(0)     == 0);
 static_assert(alignUp<int>(1)     == 8);
 static_assert(alignUp<int>(7)     == 8);
@@ -232,4 +246,7 @@ static_assert(alignDown<int>((int*) (8))     == 0);
 static_assert(alignDown<int>((int*) (0 - 1)) == 0 - 8);
 static_assert(alignDown<int>((int*) (0 - 7)) == 0 - 8);
 static_assert(alignDown<int>((int*) (0 - 8)) == 0 - 8);
+
+}
+
 #endif

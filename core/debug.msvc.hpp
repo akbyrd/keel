@@ -7,6 +7,9 @@
 #include "core/debug.hpp"
 #include "core/traits.hpp"
 
+namespace kl
+{
+
 constexpr void assert(b8 condition)
 {
 	if (!condition)
@@ -48,6 +51,8 @@ constexpr void debugBreak()
 	{
 		__debugbreak();
 	}
+}
+
 }
 
 #endif
