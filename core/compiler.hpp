@@ -4,16 +4,14 @@
 
 namespace kl
 {
+	enum class Compiler : u8
+	{
+		clang,
+		clang_cl,
+		msvc,
+	};
 
-enum class Compiler : u8
-{
-	clang,
-	clang_cl,
-	msvc,
-};
-
-//constexpr Compiler compiler;
-
+	//constexpr Compiler compiler;
 }
 
 // TODO: Warning for undefined macros

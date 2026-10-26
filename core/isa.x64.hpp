@@ -14,9 +14,7 @@
 
 namespace kl
 {
-
-constexpr ISA isa = ISA::x64;
-
+	constexpr ISA isa = ISA::x64;
 }
 
 #endif

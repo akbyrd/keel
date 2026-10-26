@@ -9,9 +9,7 @@
 
 namespace kl
 {
-
-constexpr Platform platform = Platform::win32;
-
+	constexpr Platform platform = Platform::win32;
 }
 
 #endif

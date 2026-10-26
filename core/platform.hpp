@@ -4,16 +4,14 @@
 
 namespace kl
 {
+	enum class Platform : u8
+	{
+		win32,
+	};
 
-enum class Platform : u8
-{
-	win32,
-};
+	// TODO: Passed in by build system? (Generate it)
 
-// TODO: Passed in by build system? (Generate it)
-
-//constexpr Platform platform;
-
+	//constexpr Platform platform;
 }
 
 #define KL_PLATFORM_WIN32 false

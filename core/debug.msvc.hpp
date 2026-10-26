@@ -9,50 +9,48 @@
 
 namespace kl
 {
+	constexpr void assert(b8 condition)
+	{
+		if (!condition)
+		{
+			if (isConstantEvaluated())
+			{
+				throw false;
+			}
+			else
+			{
+				__debugbreak();
+			}
+		}
+	}
 
-constexpr void assert(b8 condition)
-{
-	if (!condition)
+	constexpr void assertWin32(b8 condition)
+	{
+		// TODO: Use error
+		//u32 error = GetLastError();
+		if (!condition)
+		{
+			if (isConstantEvaluated())
+			{
+				throw false;
+			}
+			else
+			{
+				__debugbreak();
+			}
+		}
+	}
+
+	constexpr void debugBreak()
 	{
 		if (isConstantEvaluated())
 		{
-			throw false;
 		}
 		else
 		{
 			__debugbreak();
 		}
 	}
-}
-
-constexpr void assertWin32(b8 condition)
-{
-	// TODO: Use error
-	//u32 error = GetLastError();
-	if (!condition)
-	{
-		if (isConstantEvaluated())
-		{
-			throw false;
-		}
-		else
-		{
-			__debugbreak();
-		}
-	}
-}
-
-constexpr void debugBreak()
-{
-	if (isConstantEvaluated())
-	{
-	}
-	else
-	{
-		__debugbreak();
-	}
-}
-
 }
 
 #endif

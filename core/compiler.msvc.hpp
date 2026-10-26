@@ -9,9 +9,7 @@
 
 namespace kl
 {
-
-constexpr Compiler compiler = Compiler::msvc;
-
+	constexpr Compiler compiler = Compiler::msvc;
 }
 
 #endif

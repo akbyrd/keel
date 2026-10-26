@@ -8,21 +8,19 @@
 
 namespace kl
 {
+	constexpr void assert(b8 condition)
+	{
+		if (!condition)
+		{
+			__builtin_debugtrap();
+			__builtin_trap();
+		}
+	}
 
-constexpr void assert(b8 condition)
-{
-	if (!condition)
+	constexpr void debugBreak()
 	{
 		__builtin_debugtrap();
-		__builtin_trap();
 	}
-}
-
-constexpr void debugBreak()
-{
-	__builtin_debugtrap();
-}
-
 }
 
 #endif

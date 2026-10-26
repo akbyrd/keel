@@ -4,14 +4,12 @@
 
 namespace kl
 {
+	enum class ISA : u8
+	{
+		x64,
+	};
 
-enum class ISA : u8
-{
-	x64,
-};
-
-//constexpr ISA isa;
-
+	//constexpr ISA isa;
 }
 
 #define KL_ISA_X64 false

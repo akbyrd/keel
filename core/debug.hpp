@@ -4,10 +4,8 @@
 
 namespace kl
 {
-
-constexpr void assert(b8 condition);
-constexpr void debugBreak();
-
+	constexpr void assert(b8 condition);
+	constexpr void debugBreak();
 }
 
 #include "core/debug.clang.hpp" // IWYU pragma: export
