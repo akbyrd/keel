@@ -1,7 +1,7 @@
 #pragma once
 
-#include "core/debug.hpp"
-#include "core/traits.hpp"
+#include "kl/core/debug.hpp"
+#include "kl/core/traits.hpp"
 
 // -------------------------------------------------------------------------------------------------
 // Interface
@@ -201,7 +201,7 @@ namespace kl
 	template <> constexpr inline f64 goldenRatio<f64> = 1.61803398874989484;
 }
 
-#include "core/math.win32.hpp" // IWYU pragma: export
+#include "kl/core/math.win32.hpp" // IWYU pragma: export
 
 // -------------------------------------------------------------------------------------------------
 // Tests

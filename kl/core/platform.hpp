@@ -1,6 +1,6 @@
 #pragma once
 
-#include "core/types.hpp"
+#include "kl/core/types.hpp"
 
 namespace kl
 {
@@ -16,7 +16,7 @@ namespace kl
 
 #define KL_PLATFORM_WIN32 false
 
-#include "core/platform.win32.hpp" // IWYU pragma: export
+#include "kl/core/platform.win32.hpp" // IWYU pragma: export
 
 #if !defined(KL_PLATFORM_WIN32)
 	#error "Unsupported platform"

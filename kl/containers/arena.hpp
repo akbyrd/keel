@@ -1,9 +1,9 @@
 #pragma once
 
-#include "core/math.hpp"
-#include "core/meta.hpp"
-#include "memory/allocator.hpp"
-#include "memory/lifetime.hpp"
+#include "kl/core/math.hpp"
+#include "kl/core/meta.hpp"
+#include "kl/memory/allocator.hpp"
+#include "kl/memory/lifetime.hpp"
 
 // -------------------------------------------------------------------------------------------------
 // Interface

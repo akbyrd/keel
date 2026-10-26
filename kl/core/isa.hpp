@@ -1,6 +1,6 @@
 #pragma once
 
-#include "core/types.hpp"
+#include "kl/core/types.hpp"
 
 namespace kl
 {
@@ -14,7 +14,7 @@ namespace kl
 
 #define KL_ISA_X64 false
 
-#include "core/isa.x64.hpp" // IWYU pragma: export
+#include "kl/core/isa.x64.hpp" // IWYU pragma: export
 
 #if !defined(KL_ISA_X64)
 	#error "Unsupported instruction set"

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "containers/span.hpp"
-#include "memory/lifetime.hpp"
+#include "kl/containers/span.hpp"
+#include "kl/memory/lifetime.hpp"
 
 // -------------------------------------------------------------------------------------------------
 // Interface

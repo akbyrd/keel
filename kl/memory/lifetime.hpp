@@ -1,8 +1,8 @@
 #pragma once
 
-#include "containers/span.hpp"
-#include "core/traits.hpp"
-#include "memory/bytes.hpp"
+#include "kl/containers/span.hpp"
+#include "kl/core/traits.hpp"
+#include "kl/memory/bytes.hpp"
 
 // -------------------------------------------------------------------------------------------------
 // Interface

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "core/platform.hpp"
+#include "kl/core/platform.hpp"
 
 #if KL_PLATFORM_WIN32
 

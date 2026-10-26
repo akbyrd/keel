@@ -1,6 +1,6 @@
 #pragma once
 
-#include "containers/span.hpp"
+#include "kl/containers/span.hpp"
 
 // -------------------------------------------------------------------------------------------------
 // Interface
@@ -28,4 +28,4 @@ namespace kl
 	}
 }
 
-#include "memory/bytes.msvc.hpp" // IWYU pragma: export
+#include "kl/memory/bytes.msvc.hpp" // IWYU pragma: export

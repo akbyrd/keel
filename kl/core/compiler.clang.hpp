@@ -2,7 +2,7 @@
 
 #if defined(__clang__) && !defined(_MSC_VER)
 
-#include "core/compiler.hpp"
+#include "kl/core/compiler.hpp"
 
 #undef  KL_COMPILER_CLANG
 #define KL_COMPILER_CLANG true

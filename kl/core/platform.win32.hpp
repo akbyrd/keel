@@ -2,7 +2,7 @@
 
 #if defined(_MSC_VER)
 
-#include "core/platform.hpp"
+#include "kl/core/platform.hpp"
 
 #undef  KL_PLATFORM_WIN32
 #define KL_PLATFORM_WIN32 true

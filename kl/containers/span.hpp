@@ -1,7 +1,7 @@
 #pragma once
 
-#include "core/debug.hpp"
-#include "core/traits.hpp"
+#include "kl/core/debug.hpp"
+#include "kl/core/traits.hpp"
 
 // -------------------------------------------------------------------------------------------------
 // Interface

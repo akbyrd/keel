@@ -1,10 +1,10 @@
 #pragma once
 
-#include "core/compiler.hpp"
+#include "kl/core/compiler.hpp"
 
 #if KL_COMPILER_CLANG
 
-#include "core/debug.hpp"
+#include "kl/core/debug.hpp"
 
 namespace kl
 {

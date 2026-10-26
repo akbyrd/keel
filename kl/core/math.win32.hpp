@@ -1,10 +1,10 @@
 #pragma once
 
-#include "core/platform.hpp"
+#include "kl/core/platform.hpp"
 
 #if KL_PLATFORM_WIN32
 
-#include "core/math.hpp"
+#include "kl/core/math.hpp"
 #include <intrin.h>
 
 namespace kl

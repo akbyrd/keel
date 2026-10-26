@@ -12,98 +12,98 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\containers\docs.md">
+    <None Include="..\..\kl\containers\docs.md">
       <Filter>Containers</Filter>
     </None>
-    <None Include="..\..\containers\notes.md">
+    <None Include="..\..\kl\containers\notes.md">
       <Filter>Containers</Filter>
     </None>
     <None Include="..\..\docs.md" />
-    <None Include="..\..\memory\docs.md">
+    <None Include="..\..\kl\memory\docs.md">
       <Filter>Memory</Filter>
     </None>
-    <None Include="..\..\memory\notes.md">
+    <None Include="..\..\kl\memory\notes.md">
       <Filter>Memory</Filter>
     </None>
     <None Include="..\..\notes.md" />
     <None Include="..\..\style.md" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\containers\arena.hpp">
+    <ClInclude Include="..\..\kl\containers\arena.hpp">
       <Filter>Containers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\containers\span.hpp">
+    <ClInclude Include="..\..\kl\containers\span.hpp">
       <Filter>Containers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\containers\string-view.hpp">
+    <ClInclude Include="..\..\kl\containers\string-view.hpp">
       <Filter>Containers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\core\compiler.clang-cl.hpp">
+    <ClInclude Include="..\..\kl\core\compiler.clang-cl.hpp">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\core\compiler.clang.hpp">
+    <ClInclude Include="..\..\kl\core\compiler.clang.hpp">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\core\compiler.hpp">
+    <ClInclude Include="..\..\kl\core\compiler.hpp">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\core\compiler.msvc.hpp">
+    <ClInclude Include="..\..\kl\core\compiler.msvc.hpp">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\core\debug.clang.hpp">
+    <ClInclude Include="..\..\kl\core\debug.clang.hpp">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\core\debug.hpp">
+    <ClInclude Include="..\..\kl\core\debug.hpp">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\core\debug.msvc.hpp">
+    <ClInclude Include="..\..\kl\core\debug.msvc.hpp">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\core\isa.hpp">
+    <ClInclude Include="..\..\kl\core\isa.hpp">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\core\isa.x64.hpp">
+    <ClInclude Include="..\..\kl\core\isa.x64.hpp">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\core\math.hpp">
+    <ClInclude Include="..\..\kl\core\math.hpp">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\core\math.win32.hpp">
+    <ClInclude Include="..\..\kl\core\math.win32.hpp">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\core\meta.hpp">
+    <ClInclude Include="..\..\kl\core\meta.hpp">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\core\platform.hpp">
+    <ClInclude Include="..\..\kl\core\platform.hpp">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\core\platform.win32.hpp">
+    <ClInclude Include="..\..\kl\core\platform.win32.hpp">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\core\traits.hpp">
+    <ClInclude Include="..\..\kl\core\traits.hpp">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\core\types.hpp">
+    <ClInclude Include="..\..\kl\core\types.hpp">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\core\win32.hpp">
+    <ClInclude Include="..\..\kl\core\win32.hpp">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\memory\allocator.hpp">
+    <ClInclude Include="..\..\kl\memory\allocator.hpp">
       <Filter>Memory</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\memory\bytes.hpp">
+    <ClInclude Include="..\..\kl\memory\bytes.hpp">
       <Filter>Memory</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\memory\bytes.msvc.hpp">
+    <ClInclude Include="..\..\kl\memory\bytes.msvc.hpp">
       <Filter>Memory</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\memory\lifetime.hpp">
+    <ClInclude Include="..\..\kl\memory\lifetime.hpp">
       <Filter>Memory</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\memory\allocator.win32.cpp">
+    <ClCompile Include="..\..\kl\memory\allocator.win32.cpp">
       <Filter>Memory</Filter>
     </ClCompile>
   </ItemGroup>

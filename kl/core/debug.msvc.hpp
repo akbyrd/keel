@@ -1,11 +1,11 @@
 #pragma once
 
-#include "core/compiler.hpp"
+#include "kl/core/compiler.hpp"
 
 #if KL_COMPILER_MSVC || KL_COMPILER_CLANG_CL
 
-#include "core/debug.hpp"
-#include "core/traits.hpp"
+#include "kl/core/debug.hpp"
+#include "kl/core/traits.hpp"
 
 namespace kl
 {

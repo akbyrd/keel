@@ -1,8 +1,8 @@
 #pragma once
 
-#include "containers/span.hpp"
-#include "core/math.hpp"
-#include "memory/lifetime.hpp"
+#include "kl/containers/span.hpp"
+#include "kl/core/math.hpp"
+#include "kl/memory/lifetime.hpp"
 
 namespace kl
 {

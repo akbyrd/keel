@@ -1,12 +1,12 @@
 #pragma once
 
-#include "core/platform.hpp"
+#include "kl/core/platform.hpp"
 
 #if KL_PLATFORM_WIN32
 
-#include "core/math.hpp"
-#include "core/win32.hpp"
-#include "memory/allocator.hpp"
+#include "kl/core/math.hpp"
+#include "kl/core/win32.hpp"
+#include "kl/memory/allocator.hpp"
 
 namespace kl
 {

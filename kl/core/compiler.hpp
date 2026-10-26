@@ -1,6 +1,6 @@
 #pragma once
 
-#include "core/types.hpp"
+#include "kl/core/types.hpp"
 
 namespace kl
 {
@@ -21,9 +21,9 @@ namespace kl
 #define KL_COMPILER_CLANG_CL false
 #define KL_COMPILER_MSVC     false
 
-#include "core/compiler.clang.hpp"    // IWYU pragma: export
-#include "core/compiler.clang-cl.hpp" // IWYU pragma: export
-#include "core/compiler.msvc.hpp"     // IWYU pragma: export
+#include "kl/core/compiler.clang.hpp"    // IWYU pragma: export
+#include "kl/core/compiler.clang-cl.hpp" // IWYU pragma: export
+#include "kl/core/compiler.msvc.hpp"     // IWYU pragma: export
 
 #if \
 	!defined(KL_COMPILER_CLANG) && \
