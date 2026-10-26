@@ -12,5 +12,5 @@
 compile_flags.txt
 
 # MSVC local settings
-build/msvc/.vs/
-build/msvc/*.user
+build/msbuild/.vs/
+build/msbuild/*.user
