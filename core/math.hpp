@@ -170,7 +170,7 @@ template <> constexpr i32 minVal<i32> = 0x8000'0000;
 template <> constexpr i64 minVal<i64> = 0x8000'0000'0000'0000;
 template <> constexpr f32 minVal<f32> = f32(0xFF7F'FFFF);
 template <> constexpr f64 minVal<f64> = f64(0xFFEF'FFFF'FFFF'FFFF);
-template <> constexpr c8  minVal<c8>  = isSigned<c8> ? c8(0x80) : 0;
+template <> constexpr c8  minVal<c8>  = isSigned<c8> ? static_cast<c8>(0x80) : 0;
 
 template <> constexpr u8  maxVal<u8>  = 0xFF;
 template <> constexpr u16 maxVal<u16> = 0xFFFF;

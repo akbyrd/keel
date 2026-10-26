@@ -14,11 +14,11 @@ using i16 = int16_t;
 using i32 = int32_t;
 using i64 = int64_t;
 
-using f32  = float;
-using f64  = double;
+using f32 = float;
+using f64 = double;
 
-using b8   = bool;
-using c8   = char;
+using b8  = bool;
+using c8  = char;
 
 // -------------------------------------------------------------------------------------------------
 // Tests
@@ -41,5 +41,4 @@ static_assert(sizeof(f64) == 8);
 
 static_assert(sizeof(b8) == 1);
 static_assert(sizeof(c8) == 1);
-static_assert(isUnsigned<c8>);
 static_assert(CHAR_BIT == 8);

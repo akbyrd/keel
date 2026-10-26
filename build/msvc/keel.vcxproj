@@ -93,7 +93,6 @@
       <WarningLevel>Level4</WarningLevel>
       <AdditionalIncludeDirectories>..\..</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalOptions>/J %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
@@ -107,7 +106,6 @@
       <WarningLevel>Level4</WarningLevel>
       <AdditionalIncludeDirectories>..\..</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalOptions>/J %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
