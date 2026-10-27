@@ -79,13 +79,13 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>$(SolutionDir)..\..\cache\build\windows-$(Platform)-$(Configuration)-msvc\$(ProjectName)\bin\</OutDir>
-    <IntDir>$(SolutionDir)..\..\cache\build\windows-$(Platform)-$(Configuration)-msvc\$(ProjectName)\obj\</IntDir>
+    <OutDir>$(SolutionDir)..\..\cache\build\windows-$(PlatformTarget)-$(Configuration)-msvc\$(ProjectName)\bin\</OutDir>
+    <IntDir>$(SolutionDir)..\..\cache\build\windows-$(PlatformTarget)-$(Configuration)-msvc\$(ProjectName)\obj\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>$(SolutionDir)..\..\cache\build\windows-$(Platform)-$(Configuration)-msvc\$(ProjectName)\bin\</OutDir>
-    <IntDir>$(SolutionDir)..\..\cache\build\windows-$(Platform)-$(Configuration)-msvc\$(ProjectName)\obj\</IntDir>
+    <OutDir>$(SolutionDir)..\..\cache\build\windows-$(PlatformTarget)-$(Configuration)-msvc\$(ProjectName)\bin\</OutDir>
+    <IntDir>$(SolutionDir)..\..\cache\build\windows-$(PlatformTarget)-$(Configuration)-msvc\$(ProjectName)\obj\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
