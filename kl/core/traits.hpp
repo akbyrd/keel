@@ -43,8 +43,8 @@ namespace kl
 	template <typename T>                      constexpr b8 isFloatingPoint                    = isAnyOf<removeCV<T>, float, double, long double>;
 	template <typename T>                      constexpr b8 isArithmetic                       = isIntegral<T> || isFloatingPoint<T>;
 	template <typename T>                      constexpr b8 isNull                             = isSame<removeCV<T>, decltype(nullptr)>;
-	template <typename T>                      constexpr b8 isSigned                           = isIntegral<T> && T(-1) <  T(0);
-	template <typename T>                      constexpr b8 isUnsigned                         = isIntegral<T> && T(-1) >= T(0);
+	template <typename T>                      constexpr b8 isSigned                           = isIntegral<T> && T(-1) < T(0);
+	template <typename T>                      constexpr b8 isUnsigned                         = isIntegral<T> && T(-1) > T(0);
 	template <typename T>                      constexpr b8 isVoid                             = isSame<removeCV<T>, void>;
 	template <typename T>                      constexpr b8 isFundamental                      = isArithmetic<T> || isVoid<T> || isNull<T>;
 
@@ -92,7 +92,6 @@ namespace kl
 	#if false
 	isArray
 	isFunction
-	isArithmetic
 	isScalar
 	isObject
 	isCompound

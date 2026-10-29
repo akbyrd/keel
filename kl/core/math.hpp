@@ -13,7 +13,7 @@ namespace kl
 	// TODO: Test and document special cases (NaN, Inf, inverted bounds, overflow, underflow, etc)
 	// TODO: Implement safe and unsafe versions
 
-	template <typename T> requires (isUnsigned<T>) constexpr u8 countSetBits(T x);
+	template <typename T> requires (isUnsigned<T> && !isSame<T, bool>) constexpr u8 countSetBits(T x);
 	template <typename T> requires (isIntegral<T>) constexpr b8 isPowerOf2(T x);
 	template <typename T> requires (isIntegral<T>) constexpr b8 isMultipleOf(T x, T multipleOf);
 	template <typename T> requires (isIntegral<T>) constexpr T  roundUp(T x, T round);
@@ -48,7 +48,7 @@ namespace kl
 		requires (isIntegral<T>)
 	constexpr b8 isPowerOf2(T x)
 	{
-		b8 result = countSetBits(x) == 1;
+		b8 result = x > 0 && (x & (x - 1)) == 0;
 		return result;
 	}
 

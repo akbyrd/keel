@@ -10,31 +10,25 @@
 namespace kl
 {
 	template <typename T>
-		requires (isUnsigned<T>)
+		requires (isUnsigned<T> && !isSame<T, bool>)
 	constexpr u8 countSetBits(T x)
 	{
 		static_assert(sizeof(T) <= 8, "Size of type is not supported");
 
 		if (isConstantEvaluated())
 		{
-			#if false
-			// https://graphics.stanford.edu/~seander/bithacks.html#CountBitsSetKernighan
-			u8 count = 0;
-			for (; x != 0; count++)
-				x &= x - 1;
-			return count;
-
-			#elif true
 			// https://graphics.stanford.edu/~seander/bithacks.html#CountBitsSetParallel
-			constexpr T m2 = T(~T(0)) / 0b0000'0011; // 0x5555'... or 0b0101'0101'...
-			constexpr T m4 = T(~T(0)) / 0b0000'1111; // 0x3333'... or 0b0011'0011'...
-			constexpr T m8 = T(~T(0)) / 0b1111'1111; // 0x0101'... or 0b0000'0001'...
-			x = x - ((x >> 1) & m2);
-			x = (x & T(m4 * 3)) + ((x >> 2) & T(m4 * 3));
-			x = (x + (x >> 4)) & T(m8 * 15);
-			u8 count = T(x * m8) >> (sizeof(T) - 1) * 8;
+			// https://en.wikipedia.org/wiki/Hamming_weight
+			constexpr T h01 = T(~T(0)) / 0xFF;
+			constexpr T m1  = h01 * 0b0101'0101;
+			constexpr T m2  = h01 * 0b0011'0011;
+			constexpr T m4  = h01 * 0b0000'1111;
+
+			x = T( x       - ((x >> 1)  & m1));
+			x = T((x & m2) + ((x >> 2)  & m2));
+			x = T((x       +  (x >> 4)) & m4);
+			u8 count = u8((x * h01) >> (sizeof(T) - 1) * 8);
 			return count;
-			#endif
 		}
 		else
 		{
