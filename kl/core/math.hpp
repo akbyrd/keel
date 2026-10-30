@@ -31,11 +31,11 @@ namespace kl
 	// TODO: Maybe these should be in a struct? Something like attr<T>?
 	template <typename T> requires (isArithmetic<T>)    constexpr T minVal;
 	template <typename T> requires (isArithmetic<T>)    constexpr T maxVal;
-	template <typename T> requires (isFloatingPoint<T>) constexpr T smallestVal;
+	template <typename T> requires (isFloat<T>) constexpr T smallestVal;
 
-	template <typename T> requires (isFloatingPoint<T>) constexpr T pi;
-	template <typename T> requires (isFloatingPoint<T>) constexpr T tau;
-	template <typename T> requires (isFloatingPoint<T>) constexpr T goldenRatio;
+	template <typename T> requires (isFloat<T>) constexpr T pi;
+	template <typename T> requires (isFloat<T>) constexpr T tau;
+	template <typename T> requires (isFloat<T>) constexpr T goldenRatio;
 }
 
 // -------------------------------------------------------------------------------------------------

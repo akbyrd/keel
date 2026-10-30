@@ -50,37 +50,37 @@ namespace kl
 	//   class
 	//     union
 
-	template <typename T>                      constexpr b8 isBoolean                       = isAnyOf<removeCV<T>, b8>;
+	template <typename T>                      constexpr b8 isBool                          = isAnyOf<removeCV<T>, b8>;
 	template <typename T>                      constexpr b8 isCharacter                     = isAnyOf<removeCV<T>, c8, c16, utf8, utf16, utf32>;
 	template <typename T>                      constexpr b8 isSignedInteger                 = isAnyOf<removeCV<T>, i8, i16, i32, i64, signed long>;
 	template <typename T>                      constexpr b8 isUnsignedInteger               = isAnyOf<removeCV<T>, u8, u16, u32, u64, unsigned long>;
-	template <typename T>                      constexpr b8 isFloatingPoint                 = isAnyOf<removeCV<T>, f32, f64, long double>;
+	template <typename T>                      constexpr b8 isFloat                         = isAnyOf<removeCV<T>, f32, f64, long double>;
 	template <typename T>                      constexpr b8 isVoid                          = isAnyOf<removeCV<T>, void>;
 	template <typename T>                      constexpr b8 isNull                          = isAnyOf<removeCV<T>, null>;
 
 	template <typename T>                      constexpr b8 isInteger                       = isSignedInteger<T> || isUnsignedInteger<T>;
-	template <typename T>                      constexpr b8 isIntegral                      = isBoolean<T> || isCharacter<T> || isInteger<T>;
-	template <typename T>                      constexpr b8 isArithmetic                    = isIntegral<T> || isFloatingPoint<T>;
+	template <typename T>                      constexpr b8 isIntegral                      = isBool<T> || isCharacter<T> || isInteger<T>;
+	template <typename T>                      constexpr b8 isArithmetic                    = isIntegral<T> || isFloat<T>;
 	template <typename T>                      constexpr b8 isFundamental                   = isArithmetic<T> || isVoid<T> || isNull<T>;
 
 	template <typename T>                      constexpr b8 isSigned                        = isIntegral<T> && T(-1) < T(0);
 	template <typename T>                      constexpr b8 isUnsigned                      = isIntegral<T> && T(-1) > T(0);
 
-	template <typename T>                      constexpr b8 isLReference                    = false;
-	template <typename T>                      constexpr b8 isLReference<T&>                = true;
-	template <typename T>                      constexpr b8 isRReference                    = false;
-	template <typename T>                      constexpr b8 isRReference<T&&>               = true;
-	template <typename T>                      constexpr b8 isReference                     = isLReference<T> || isRReference<T>;
-	template <typename T>                      constexpr b8 _isPointer                      = false;
-	template <typename T>                      constexpr b8 _isPointer<T*>                  = true;
-	template <typename T>                      constexpr b8 isPointer                       = _isPointer<removeCV<T>>;
-	template <typename T>                      constexpr b8 _isMemberPointer                = false;
-	template <typename T, typename U>          constexpr b8 _isMemberPointer<T U::*>        = true;
-	template <typename T>                      constexpr b8 isMemberPointer                 = _isMemberPointer<removeCV<T>>;
+	template <typename T>                      constexpr b8 isLRef                          = false;
+	template <typename T>                      constexpr b8 isLRef<T&>                      = true;
+	template <typename T>                      constexpr b8 isRRef                          = false;
+	template <typename T>                      constexpr b8 isRRef<T&&>                     = true;
+	template <typename T>                      constexpr b8 isRef                           = isLRef<T> || isRRef<T>;
+	template <typename T>                      constexpr b8 _isPtr                          = false;
+	template <typename T>                      constexpr b8 _isPtr<T*>                      = true;
+	template <typename T>                      constexpr b8 isPtr                           = _isPtr<removeCV<T>>;
+	template <typename T>                      constexpr b8 _isMemberPtr                    = false;
+	template <typename T, typename U>          constexpr b8 _isMemberPtr<T U::*>            = true;
+	template <typename T>                      constexpr b8 isMemberPtr                     = _isMemberPtr<removeCV<T>>;
 	template <typename T>                      constexpr b8 isArray                         = false;
 	template <typename T>                      constexpr b8 isArray<T[]>                    = true;
 	template <typename T, u64 N>               constexpr b8 isArray<T[N]>                   = true;
-	template <typename T>                      constexpr b8 isFunction                      = !isConst<const T> && !isReference<T>;
+	template <typename T>                      constexpr b8 isFunction                      = !isConst<const T> && !isRef<T>;
 	template <typename T>                      constexpr b8 isEnum                          = __is_enum(T);
 	template <typename T>                      constexpr b8 isClass                         = __is_class(T);
 	template <typename T>                      constexpr b8 isUnion                         = __is_union(T);
