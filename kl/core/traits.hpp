@@ -63,8 +63,8 @@ namespace kl
 	template <typename T>                      constexpr b8 isArithmetic                    = isIntegral<T> || isFloat<T>;
 	template <typename T>                      constexpr b8 isFundamental                   = isArithmetic<T> || isVoid<T> || isNull<T>;
 
-	template <typename T>                      constexpr b8 isSigned                        = isIntegral<T> && T(-1) < T(0);
-	template <typename T>                      constexpr b8 isUnsigned                      = isIntegral<T> && T(-1) > T(0);
+	template <typename T>                      constexpr b8 isSigned                        = isArithmetic<T> && requires { requires T(-1) < T(0); };
+	template <typename T>                      constexpr b8 isUnsigned                      = isArithmetic<T> && requires { requires T(-1) > T(0); };
 
 	template <typename T>                      constexpr b8 isLRef                          = false;
 	template <typename T>                      constexpr b8 isLRef<T&>                      = true;

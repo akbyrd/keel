@@ -10,7 +10,7 @@
 namespace kl
 {
 	template <typename T>
-		requires (isUnsigned<T> && !isSame<T, bool>)
+		requires (isUnsignedInteger<T>)
 	constexpr u8 countSetBits(T x)
 	{
 		static_assert(sizeof(T) <= 8, "Size of type is not supported");
