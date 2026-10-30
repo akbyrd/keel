@@ -12,9 +12,8 @@ namespace kl
 	// TODO: Prevent move on const&
 	template <typename T> constexpr removeRef<T>&& move(T&& x);
 	template <typename T> constexpr MoveSpan<T> move(Span<T> x);
-	//template <typename T> constexpr T&& forward(removeRef<T>& x);
-	//template <typename T> constexpr T&& forward(removeRef<T>&& x);
-	template <typename T> constexpr T&& forward(T&& x);
+	template <typename T> constexpr T&& forward(removeRef<T>& x);
+	template <typename T> constexpr T&& forward(removeRef<T>&& x);
 
 	// TODO: Think about the exact set of operations we want
 	template <typename T, typename... Args> constexpr void construct(T& dst, Args&& ...args);
@@ -65,7 +64,6 @@ namespace kl
 		return x;
 	}
 
-	#if false
 	template <typename T>
 	constexpr T&&
 	forward(removeRef<T>& x)
@@ -77,34 +75,22 @@ namespace kl
 	constexpr T&&
 	forward(removeRef<T>&& x)
 	{
-		static_assert(!isLValueRef<T>);
+		static_assert(!isLRef<T>);
 		return static_cast<T&&>(x);
 	}
-	#else
-	// TODO: Test this thoroughly
-	template <typename T>
-	constexpr T&&
-	forward(T&& x)
-	{
-		if constexpr (isRRef<decltype(x)>)
-			static_assert(!isLRef<T>);
-
-		return static_cast<T&&>(x);
-	}
-	#endif
 
 	template <typename T, typename... Args>
 	constexpr void
 	construct(T& dst, Args&& ...args)
 	{
-		new (&dst, PlacementTag{}) T { forward(args)... };
+		new (&dst, PlacementTag{}) T { forward<Args>(args)... };
 	}
 
 	template <typename T, typename... Args>
 	constexpr void
 	construct(Span<T> dst, Args&& ...args)
 	{
-		new (&dst.data[0], PlacementTag{}) T { forward(args)... };
+		new (&dst.data[0], PlacementTag{}) T { forward<Args>(args)... };
 		for (i64 i = 1; i < dst.len; ++i)
 			dst.data[i] = dst.data[0];
 	}

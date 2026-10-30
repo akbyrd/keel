@@ -176,7 +176,7 @@ namespace kl
 	Arena::push(Args&& ...args)
 	{
 		Span<T> x = pushArray<T>(1, NoInit {});
-		construct(x[0], forward(args)...);
+		construct(x[0], forward<Args>(args)...);
 		return x[0];
 	}
 
@@ -240,6 +240,7 @@ namespace kl
 	{
 		Span<T> x = pushArray<T>(count, NoInit {});
 		defaultConstruct(x);
+		return x;
 	}
 
 	template <typename T>
@@ -247,17 +248,19 @@ namespace kl
 	Arena::pushArray(i64 count, T&& value)
 	{
 		Span<T> x = pushArray<T>(count, NoInit {});
-		moveConstruct(x, forward(value));
+		moveConstruct(x, move(value));
+		return x;
 	}
 
 	template <typename T, typename ...Args>
 	constexpr Span<T>
-	pushArray (i64 count, Args&& ...args)
+	Arena::pushArray(i64 count, Args&& ...args)
 	{
 		Span<T> x = pushArray<T>(count, NoInit {});
-		construct(x[0], forward(args)...);
+		construct(x[0], forward<Args>(args)...);
 		for (i64 i = 1; i < count; ++i)
 			x[i] = x[0];
+		return x;
 	}
 
 	template <typename T, typename ...Args>
