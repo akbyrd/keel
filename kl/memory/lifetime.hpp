@@ -86,8 +86,8 @@ namespace kl
 	constexpr T&&
 	forward(T&& x)
 	{
-		if constexpr (isRValueRef<decltype(x)>)
-			static_assert(!isLValueRef<T>);
+		if constexpr (isRReference<decltype(x)>)
+			static_assert(!isLReference<T>);
 
 		return static_cast<T&&>(x);
 	}

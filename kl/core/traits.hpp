@@ -23,79 +23,102 @@ namespace kl
 	template <typename T> struct _removeRef<T&&> { using Type = T; };
 	template <typename T> using removeRef = typename _removeRef<T>::Type;
 
-	template <typename T, typename U>          constexpr b8 isSame                             = false;
-	template <typename T>                      constexpr b8 isSame<T, T>                       = true;
-	template <typename T, typename... Us>      constexpr b8 isAnyOf                            = (isSame<T, Us> || ...);
+	template <typename T, typename U>          constexpr b8 isSame                          = false;
+	template <typename T>                      constexpr b8 isSame<T, T>                    = true;
+	template <typename T, typename... Us>      constexpr b8 isAnyOf                         = (isSame<T, Us> || ...);
+	template <typename T>                      constexpr b8 isConst                         = false;
+	template <typename T>                      constexpr b8 isConst<const T>                = true;
 
-	template <typename T>                      constexpr b8 _isPointer                         = false;
-	template <typename T>                      constexpr b8 _isPointer<T*>                     = true;
-	template <typename T>                      constexpr b8 isPointer                          = _isPointer<removeCV<T>>;
+	// fundamental
+	//   arithmetic
+	//     integral
+	//       boolean
+	//       character
+	//       integer
+	//         signed integer
+	//         unsigned integer
+	//     floating point
+	//   void
+	//   nullptr
+	// compound
+	//   reference
+	//   pointer
+	//   member pointer
+	//   array
+	//   function
+	//   enumeration
+	//   class
+	//     union
 
-	template <typename T>                      constexpr b8 isIntegral                         = isAnyOf<removeCV<T>,
-		bool,
-		wchar_t, char8_t, char16_t, char32_t,
-		char,      unsigned char, signed char,
-		short,     unsigned short,
-		int,       unsigned int,
-		long,      unsigned long,
-		long long, unsigned long long> || isPointer<T>;
+	template <typename T>                      constexpr b8 isBoolean                       = isAnyOf<removeCV<T>, b8>;
+	template <typename T>                      constexpr b8 isCharacter                     = isAnyOf<removeCV<T>, c8, c16, utf8, utf16, utf32>;
+	template <typename T>                      constexpr b8 isSignedInteger                 = isAnyOf<removeCV<T>, i8, i16, i32, i64, signed long>;
+	template <typename T>                      constexpr b8 isUnsignedInteger               = isAnyOf<removeCV<T>, u8, u16, u32, u64, unsigned long>;
+	template <typename T>                      constexpr b8 isFloatingPoint                 = isAnyOf<removeCV<T>, f32, f64, long double>;
+	template <typename T>                      constexpr b8 isVoid                          = isAnyOf<removeCV<T>, void>;
+	template <typename T>                      constexpr b8 isNull                          = isAnyOf<removeCV<T>, null>;
 
-	template <typename T>                      constexpr b8 isFloatingPoint                    = isAnyOf<removeCV<T>, float, double, long double>;
-	template <typename T>                      constexpr b8 isArithmetic                       = isIntegral<T> || isFloatingPoint<T>;
-	template <typename T>                      constexpr b8 isNull                             = isSame<removeCV<T>, decltype(nullptr)>;
-	template <typename T>                      constexpr b8 isSigned                           = isIntegral<T> && T(-1) < T(0);
-	template <typename T>                      constexpr b8 isUnsigned                         = isIntegral<T> && T(-1) > T(0);
-	template <typename T>                      constexpr b8 isVoid                             = isSame<removeCV<T>, void>;
-	template <typename T>                      constexpr b8 isFundamental                      = isArithmetic<T> || isVoid<T> || isNull<T>;
+	template <typename T>                      constexpr b8 isInteger                       = isSignedInteger<T> || isUnsignedInteger<T>;
+	template <typename T>                      constexpr b8 isIntegral                      = isBoolean<T> || isCharacter<T> || isInteger<T>;
+	template <typename T>                      constexpr b8 isArithmetic                    = isIntegral<T> || isFloatingPoint<T>;
+	template <typename T>                      constexpr b8 isFundamental                   = isArithmetic<T> || isVoid<T> || isNull<T>;
 
-	template <typename T>                      constexpr b8 isLValueRef                        = false;
-	template <typename T>                      constexpr b8 isLValueRef<T&>                    = true;
-	template <typename T>                      constexpr b8 isRValueRef                        = false;
-	template <typename T>                      constexpr b8 isRValueRef<T&&>                   = true;
+	template <typename T>                      constexpr b8 isSigned                        = isIntegral<T> && T(-1) < T(0);
+	template <typename T>                      constexpr b8 isUnsigned                      = isIntegral<T> && T(-1) > T(0);
 
-	template <typename T>                      constexpr b8 isConst                            = false;
-	template <typename T>                      constexpr b8 isConst<const T>                   = true;
+	template <typename T>                      constexpr b8 isLReference                    = false;
+	template <typename T>                      constexpr b8 isLReference<T&>                = true;
+	template <typename T>                      constexpr b8 isRReference                    = false;
+	template <typename T>                      constexpr b8 isRReference<T&&>               = true;
+	template <typename T>                      constexpr b8 isReference                     = isLReference<T> || isRReference<T>;
+	template <typename T>                      constexpr b8 _isPointer                      = false;
+	template <typename T>                      constexpr b8 _isPointer<T*>                  = true;
+	template <typename T>                      constexpr b8 isPointer                       = _isPointer<removeCV<T>>;
+	template <typename T>                      constexpr b8 _isMemberPointer                = false;
+	template <typename T, typename U>          constexpr b8 _isMemberPointer<T U::*>        = true;
+	template <typename T>                      constexpr b8 isMemberPointer                 = _isMemberPointer<removeCV<T>>;
+	template <typename T>                      constexpr b8 isArray                         = false;
+	template <typename T>                      constexpr b8 isArray<T[]>                    = true;
+	template <typename T, u64 N>               constexpr b8 isArray<T[N]>                   = true;
+	template <typename T>                      constexpr b8 isFunction                      = !isConst<const T> && !isReference<T>;
+	template <typename T>                      constexpr b8 isEnum                          = __is_enum(T);
+	template <typename T>                      constexpr b8 isClass                         = __is_class(T);
+	template <typename T>                      constexpr b8 isUnion                         = __is_union(T);
+	template <typename T>                      constexpr b8 isCompound                      = !isFundamental<T>;
 
-	template <typename T>                      constexpr b8 isEnum                             = __is_enum(T);
-	template <typename T>                      constexpr b8 isUnion                            = __is_union(T);
-	template <typename T>                      constexpr b8 isAbstract                         = __is_abstract(T);
-	template <typename T>                      constexpr b8 isAggregate                        = __is_aggregate(T);
-	template <typename To, typename From>      constexpr b8 isAssignable                       = __is_assignable(To, From);
-	template <typename Base, typename Derived> constexpr b8 isBaseOf                           = __is_base_of(Base, Derived);
-	template <typename T>                      constexpr b8 isClass                            = __is_class(T);
-	template <typename T, typename... Args>    constexpr b8 isConstructible                    = __is_constructible(T, Args...);
-	template <typename To, typename From>      constexpr b8 isConvertibleTo                    = __is_convertible_to(From, To);
-	template <typename T>                      constexpr b8 isDestructible                     = __is_destructible(T);
-	template <typename T>                      constexpr b8 isEmpty                            = __is_empty(T);
-	template <typename T>                      constexpr b8 isFinal                            = __is_final(T);
-	template <typename T, typename U>          constexpr b8 isLayoutCompatible                 = __is_layout_compatible(T, U);
-	template <typename T>                      constexpr b8 isLiteralType                      = __is_literal_type(T);
-	template <typename T>                      constexpr b8 isPod                              = __is_pod(T);
-	template <typename Base, typename Derived> constexpr b8 isPointerInterconvertibleBaseOf    = __is_pointer_interconvertible_base_of(Base, Derived);
-	template <typename T>                      constexpr b8 isPolymorphic                      = __is_polymorphic(T);
-	template <typename T>                      constexpr b8 isStandardLayout                   = __is_standard_layout(T);
-	template <typename T>                      constexpr b8 isTrivial                          = __is_trivial(T);
-	template <typename To, typename From>      constexpr b8 isTriviallyAssignable              = __is_trivially_assignable(To, From);
-	template <typename T>                      constexpr b8 isTriviallyCopyAssignable          = __is_trivially_assignable(T&, const T&);
-	template <typename T>                      constexpr b8 isTriviallyMoveAssignable          = __is_trivially_assignable(T&, T);
-	template <typename T, typename... Args>    constexpr b8 isTriviallyConstructible           = __is_trivially_constructible(T, Args...);
-	template <typename T>                      constexpr b8 isTriviallyCopyConstructible       = __is_trivially_constructible(T, const T&);
-	template <typename T>                      constexpr b8 isTriviallyMoveConstructible       = __is_trivially_constructible(T, T);
-	template <typename T>                      constexpr b8 isTriviallyCopyable                = __is_trivially_copyable(T);
-	template <typename T>                      constexpr b8 isTriviallyDestructible            = __is_trivially_destructible(T);
+	template <typename T>                      constexpr b8 isAbstract                      = __is_abstract(T);
+	template <typename T>                      constexpr b8 isAggregate                     = __is_aggregate(T);
+	template <typename To, typename From>      constexpr b8 isAssignable                    = __is_assignable(To, From);
+	template <typename Base, typename Derived> constexpr b8 isBaseOf                        = __is_base_of(Base, Derived);
+	template <typename T, typename... Args>    constexpr b8 isConstructible                 = __is_constructible(T, Args...);
+	template <typename To, typename From>      constexpr b8 isConvertibleTo                 = __is_convertible_to(From, To);
+	template <typename T>                      constexpr b8 isDestructible                  = __is_destructible(T);
+	template <typename T>                      constexpr b8 isEmpty                         = __is_empty(T);
+	template <typename T>                      constexpr b8 isFinal                         = __is_final(T);
+	template <typename T, typename U>          constexpr b8 isLayoutCompatible              = __is_layout_compatible(T, U);
+	template <typename T>                      constexpr b8 isLiteralType                   = __is_literal_type(T);
+	template <typename T>                      constexpr b8 isPod                           = __is_pod(T);
+	template <typename Base, typename Derived> constexpr b8 isPointerInterconvertibleBaseOf = __is_pointer_interconvertible_base_of(Base, Derived);
+	template <typename T>                      constexpr b8 isPolymorphic                   = __is_polymorphic(T);
+	template <typename T>                      constexpr b8 isStandardLayout                = __is_standard_layout(T);
+	template <typename T>                      constexpr b8 isTrivial                       = __is_trivial(T);
+	template <typename To, typename From>      constexpr b8 isTriviallyAssignable           = __is_trivially_assignable(To, From);
+	template <typename T>                      constexpr b8 isTriviallyCopyAssignable       = __is_trivially_assignable(T&, const T&);
+	template <typename T>                      constexpr b8 isTriviallyMoveAssignable       = __is_trivially_assignable(T&, T);
+	template <typename T, typename... Args>    constexpr b8 isTriviallyConstructible        = __is_trivially_constructible(T, Args...);
+	template <typename T>                      constexpr b8 isTriviallyCopyConstructible    = __is_trivially_constructible(T, const T&);
+	template <typename T>                      constexpr b8 isTriviallyMoveConstructible    = __is_trivially_constructible(T, T);
+	template <typename T>                      constexpr b8 isTriviallyCopyable             = __is_trivially_copyable(T);
+	template <typename T>                      constexpr b8 isTriviallyDestructible         = __is_trivially_destructible(T);
 
 	// TODO: Where should this live?
 	// TODO: Can replace is with `if consteval` if using C++ 23
-	constexpr bool isConstantEvaluated() { return __builtin_is_constant_evaluated(); }
+	constexpr b8 isConstantEvaluated() { return __builtin_is_constant_evaluated(); }
 
 	// TODO: Implement
 	#if false
-	isArray
-	isFunction
 	isScalar
 	isObject
-	isCompound
-	isReference
 	isVolatile
 	isImplicitLifetime
 	isBoundedArray

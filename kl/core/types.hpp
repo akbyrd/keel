@@ -1,28 +1,30 @@
 #pragma once
 
-// TODO: Try to remove this
-#include <cstdint>
-
 namespace kl
 {
-	// TODO: Is uint8_t guaranteed to be unsigned char / std::byte / compatible with lifetime operations?
-	using u8  = uint8_t;
-	using u16 = uint16_t;
-	using u32 = uint32_t;
-	using u64 = uint64_t;
+	using u8  = unsigned char;
+	using u16 = unsigned short;
+	using u32 = unsigned int;
+	using u64 = unsigned long long;
 
-	using i8  = int8_t;
-	using i16 = int16_t;
-	using i32 = int32_t;
-	using i64 = int64_t;
+	using i8  = signed char;
+	using i16 = signed short;
+	using i32 = signed int;
+	using i64 = signed long long;
 
 	using f32 = float;
 	using f64 = double;
 
-	using b8  = bool;
-	using c8  = char;
-}
+	using b8 = bool;
 
+	using c8    = char;
+	using c16   = wchar_t;
+	using utf8  = char8_t;
+	using utf16 = char16_t;
+	using utf32 = char32_t;
+
+	using null = decltype(nullptr);
+}
 
 // -------------------------------------------------------------------------------------------------
 // Tests
@@ -45,6 +47,11 @@ namespace kl
 	static_assert(sizeof(f64) == 8);
 
 	static_assert(sizeof(b8) == 1);
-	static_assert(sizeof(c8) == 1);
+
 	static_assert(CHAR_BIT == 8);
+	static_assert(sizeof(c8)    == 1);
+	static_assert(sizeof(c16)   == 2);
+	static_assert(sizeof(utf8)  == 1);
+	static_assert(sizeof(utf16) == 2);
+	static_assert(sizeof(utf32) == 4);
 }
