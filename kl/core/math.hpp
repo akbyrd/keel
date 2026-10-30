@@ -29,8 +29,8 @@ namespace kl
 	template <typename T> constexpr u8* alignDown(u8* x);
 
 	// TODO: Maybe these should be in a struct? Something like attr<T>?
-	template <typename T> requires (isArithmetic<T>)    constexpr T minVal;
-	template <typename T> requires (isArithmetic<T>)    constexpr T maxVal;
+	template <typename T> requires (isArithmetic<T>) constexpr T minVal;
+	template <typename T> requires (isArithmetic<T>) constexpr T maxVal;
 	template <typename T> requires (isFloat<T>) constexpr T smallestVal;
 
 	template <typename T> requires (isFloat<T>) constexpr T pi;
@@ -173,8 +173,8 @@ namespace kl
 	template <> constexpr inline i16 minVal<i16> = static_cast<i16>(0x8000);
 	template <> constexpr inline i32 minVal<i32> = 0x8000'0000;
 	template <> constexpr inline i64 minVal<i64> = 0x8000'0000'0000'0000;
-	template <> constexpr inline f32 minVal<f32> = f32(0xFF7F'FFFF);
-	template <> constexpr inline f64 minVal<f64> = f64(0xFFEF'FFFF'FFFF'FFFF);
+	template <> constexpr inline f32 minVal<f32> = __builtin_bit_cast(f32, 0xFF7F'FFFF);
+	template <> constexpr inline f64 minVal<f64> = __builtin_bit_cast(f64, 0xFFEF'FFFF'FFFF'FFFF);
 	template <> constexpr inline c8  minVal<c8>  = isSigned<c8> ? static_cast<c8>(0x80) : 0;
 
 	template <> constexpr inline u8  maxVal<u8>  = 0xFF;
@@ -185,8 +185,8 @@ namespace kl
 	template <> constexpr inline i16 maxVal<i16> = 0x7FFF;
 	template <> constexpr inline i32 maxVal<i32> = 0x7FFF'FFFF;
 	template <> constexpr inline i64 maxVal<i64> = 0x7FFF'FFFF'FFFF'FFFF;
-	template <> constexpr inline f32 maxVal<f32> = f32(0x7F7F'FFFF);
-	template <> constexpr inline f64 maxVal<f64> = f64(0x7FEF'FFFF'FFFF'FFFF);
+	template <> constexpr inline f32 maxVal<f32> = __builtin_bit_cast(f32, 0x7F7F'FFFF);
+	template <> constexpr inline f64 maxVal<f64> = __builtin_bit_cast(f64, 0x7FEF'FFFF'FFFF'FFFF);
 	template <> constexpr inline c8  maxVal<c8>  = isSigned<c8> ? 0x7F : 0xFF;
 
 	// TODO: Consider a "make float" function
