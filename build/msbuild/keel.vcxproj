@@ -30,6 +30,7 @@
     <ClInclude Include="..\..\kl\core\debug.clang.hpp" />
     <ClInclude Include="..\..\kl\core\debug.hpp" />
     <ClInclude Include="..\..\kl\core\debug.msvc.hpp" />
+    <ClInclude Include="..\..\kl\core\hash.hpp" />
     <ClInclude Include="..\..\kl\core\isa.hpp" />
     <ClInclude Include="..\..\kl\core\isa.x64.hpp" />
     <ClInclude Include="..\..\kl\core\math.hpp" />

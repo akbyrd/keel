@@ -59,6 +59,9 @@
     <ClInclude Include="..\..\kl\core\debug.msvc.hpp">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\kl\core\hash.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\kl\core\isa.hpp">
       <Filter>Core</Filter>
     </ClInclude>
