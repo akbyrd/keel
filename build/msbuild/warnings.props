@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <WarningLevel>EnableAllWarnings</WarningLevel>
+
+      <!-- C4514: unreferenced inline function has been removed. -->
+      <DisableSpecificWarnings>4514;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+
+      <!-- C4711: Function selected for automatic inlining. -->
+      <DisableSpecificWarnings>4711;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+
+      <!-- C4820: Padding added after a data member. -->
+      <DisableSpecificWarnings>4820;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+
+      <!-- C5045: Spectre mitigation would be inserted if /Qspectre were used. -->
+      <DisableSpecificWarnings>5045;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+
+      <TreatAngleIncludeAsExternal>true</TreatAngleIncludeAsExternal>
+      <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
+    </ClCompile>
+  </ItemDefinitionGroup>
+</Project>
