@@ -74,6 +74,9 @@
     <ClInclude Include="..\..\kl\core\meta.hpp">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\kl\core\move.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\kl\core\platform.hpp">
       <Filter>Core</Filter>
     </ClInclude>

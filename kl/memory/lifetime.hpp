@@ -1,6 +1,7 @@
 #pragma once
 
 #include "kl/containers/span.hpp"
+#include "kl/core/move.hpp"
 #include "kl/core/traits.hpp"
 #include "kl/memory/bytes.hpp"
 
@@ -9,12 +10,6 @@
 
 namespace kl
 {
-	// TODO: Prevent move on const&
-	template <typename T> constexpr removeRef<T>&& move(T&& x);
-	template <typename T> constexpr MoveSpan<T> move(Span<T> x);
-	template <typename T> constexpr T&& forward(removeRef<T>& x);
-	template <typename T> constexpr T&& forward(removeRef<T>&& x);
-
 	// TODO: Think about the exact set of operations we want
 	template <typename T, typename... Args> constexpr void construct(T& dst, Args&& ...args);
 	template <typename T, typename... Args> constexpr void construct(Span<T> dst, Args&& ...args);
@@ -50,35 +45,6 @@ inline void  operator delete(void*, void*, kl::PlacementTag) {}
 
 namespace kl
 {
-	template <typename T>
-	constexpr removeRef<T>&&
-	move(T&& x)
-	{
-		return static_cast<removeRef<T>&&>(x);
-	}
-
-	template <typename T>
-	constexpr MoveSpan<T>
-	move(Span<T> x)
-	{
-		return x;
-	}
-
-	template <typename T>
-	constexpr T&&
-	forward(removeRef<T>& x)
-	{
-		return static_cast<T&&>(x);
-	}
-
-	template <typename T>
-	constexpr T&&
-	forward(removeRef<T>&& x)
-	{
-		static_assert(!isLRef<T>);
-		return static_cast<T&&>(x);
-	}
-
 	template <typename T, typename... Args>
 	constexpr void
 	construct(T& dst, Args&& ...args)

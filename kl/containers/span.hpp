@@ -1,6 +1,7 @@
 #pragma once
 
 #include "kl/core/debug.hpp"
+#include "kl/core/move.hpp"
 #include "kl/core/traits.hpp"
 
 // -------------------------------------------------------------------------------------------------
@@ -72,6 +73,8 @@ namespace kl
 		constexpr T&&      operator[] (i64 x);
 		constexpr const T& operator[] (i64 x) const;
 	};
+
+	template <typename T> constexpr MoveSpan<T> move(Span<T> x);
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -300,5 +303,12 @@ namespace kl
 		using Base = Span<T>;
 		assert(x < Base::len);
 		return move(Base::data[x]);
+	}
+
+	template <typename T>
+	constexpr MoveSpan<T>
+	move(Span<T> x)
+	{
+		return { x };
 	}
 }
