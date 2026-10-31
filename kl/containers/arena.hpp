@@ -191,7 +191,7 @@ namespace kl
 			if (!lastMeta || lastMeta->id.val != id<T>.val)
 			{
 				Span<Meta> metas = pushArray<Meta>(1, NoInit {});
-				u8* dst = alignUp<T>(alloc.bytes.data + used);
+				u8* dst = alignUp(alloc.bytes.data + used, alignof(T));
 
 				Meta& meta = metas[0];
 				// TODO: Compare
@@ -199,10 +199,10 @@ namespace kl
 				new (&meta, PlacementTag{}) Meta {
 					.id       = TypeInfo<T>::id,
 					.size     = TypeInfo<T>::size,
-					.offset   = dst - alloc.bytes.data, // TODO: RelPtr?
+					.offset   = i32(dst - alloc.bytes.data), // TODO: RelPtr?
 					.count    = 0,
 					.prevMeta = lastMeta,
-					.destruct = TypeInfo<T>::destruct,
+					.destruct = [](Span<u8> items) { TypeInfo<T>::destruct(items.as<T>()); },
 				};
 
 				lastMeta = &meta;
@@ -212,14 +212,14 @@ namespace kl
 		}
 
 		// TODO: Try to simplify this
-		u8* dst = alignUp<T>(alloc.bytes.data + used);
+		u8* dst = alignUp(alloc.bytes.data + used, alignof(T));
 		u8* end = dst + count * sizeof(T);
 		i64 required = end - alloc.bytes.data;
 		if (required > alloc.bytes.len)
 		{
 			if (reserved && required <= reserved)
 			{
-				i64 newCap = i64(alloc.bytes.len * goldenRatio<f32>);
+				i64 newCap = i64(f64(alloc.bytes.len) * goldenRatio<f64>);
 				newCap = clamp(newCap, required, reserved);
 				VirtualAllocator::commit(alloc, newCap);
 			}

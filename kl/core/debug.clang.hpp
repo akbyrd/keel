@@ -8,7 +8,8 @@
 
 namespace kl
 {
-	constexpr void assert(b8 condition)
+	constexpr void
+	assert(b8 condition)
 	{
 		if (!condition)
 		{
@@ -17,7 +18,8 @@ namespace kl
 		}
 	}
 
-	constexpr void debugBreak()
+	constexpr void
+	debugBreak()
 	{
 		__builtin_debugtrap();
 	}

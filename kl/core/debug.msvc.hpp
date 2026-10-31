@@ -9,7 +9,8 @@
 
 namespace kl
 {
-	constexpr void assert(b8 condition)
+	constexpr void
+	assert(b8 condition)
 	{
 		if (!condition)
 		{
@@ -24,7 +25,8 @@ namespace kl
 		}
 	}
 
-	constexpr void assertWin32(b8 condition)
+	constexpr void
+	assertWin32(b8 condition)
 	{
 		// TODO: Use error
 		//u32 error = GetLastError();
@@ -41,7 +43,15 @@ namespace kl
 		}
 	}
 
-	constexpr void debugBreak()
+	template <typename T>
+	constexpr void
+	assertWin32(const T& condition)
+	{
+		assertWin32(b8(condition));
+	}
+
+	constexpr void
+	debugBreak()
 	{
 		if (isConstantEvaluated())
 		{

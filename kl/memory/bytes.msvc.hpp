@@ -27,7 +27,7 @@ namespace kl
 		else
 		{
 			assert(dst.data);
-			memset(dst.data, 0, dst.len);
+			memset(dst.data, 0, u64(dst.len));
 		}
 	}
 
@@ -42,7 +42,7 @@ namespace kl
 		else
 		{
 			assert(dst.data);
-			memset(dst.data, src, dst.len);
+			memset(dst.data, src, u64(dst.len));
 		}
 	}
 
@@ -61,7 +61,7 @@ namespace kl
 		{
 			assert(dst.data);
 			assert(src.data);
-			memcpy(dst.data, src.data, src.len);
+			memcpy(dst.data, src.data, u64(src.len));
 		}
 	}
 
@@ -87,7 +87,7 @@ namespace kl
 		{
 			assert(dst.data);
 			assert(src.data);
-			memmove(dst.data, src.data, src.len);
+			memmove(dst.data, src.data, u64(src.len));
 		}
 	}
 }

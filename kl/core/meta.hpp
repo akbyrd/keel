@@ -55,13 +55,13 @@ namespace kl
 		using MoveConstruct1Fn = void(Span<T> dst, T&& src);
 		static constexpr MoveConstruct1Fn* moveConstruct1 = &kl::moveConstruct<T>;
 
-		using MoveConstructFn = void(Span<T> dst, Span<T> src);
+		using MoveConstructFn = void(Span<T> dst, MoveSpan<T> src);
 		static constexpr MoveConstructFn* moveConstruct = &kl::moveConstruct<T>;
 
 		using DestructFn = void(Span<T> dst);
 		static constexpr DestructFn* destruct = &kl::destruct<T>;
 
-		using RelocateFn = void(Span<T> dst, Span<T> src);
+		using RelocateFn = void(Span<T> dst, MoveSpan<T> src);
 		static constexpr RelocateFn* relocate = &kl::relocate<T>;
 
 		using CopyAssign1Fn = void(Span<T> dst, const T& src);
@@ -73,7 +73,7 @@ namespace kl
 		using MoveAssign1Fn = void(Span<T> dst, T&& src);
 		static constexpr MoveAssign1Fn* moveAssign1 = &kl::moveAssign<T>;
 
-		using MoveAssignFn = void(Span<T> dst, Span<T> src);
+		using MoveAssignFn = void(Span<T> dst, MoveSpan<T> src);
 		static constexpr MoveAssignFn* moveAssign = &kl::moveAssign<T>;
 	};
 }

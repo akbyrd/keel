@@ -51,8 +51,8 @@ namespace kl
 		constexpr Span<T> resizeFront (i64 frontDelta) const;
 		constexpr Span<T> resizeBack  (i64 backDelta) const;
 
-		constexpr Span<T> next (i64 len) const;
-		constexpr Span<T> prev (i64 len) const;
+		constexpr Span<T> next (i64 newLen) const;
+		constexpr Span<T> prev (i64 newLen) const;
 
 		constexpr bool overlaps(Span<const T> x) const;
 
@@ -136,7 +136,7 @@ namespace kl
 	template <typename T>
 	constexpr Span<T>::operator bool() const
 	{
-		return len;
+		return len != 0;
 	}
 
 	template <typename T>
@@ -164,7 +164,7 @@ namespace kl
 	constexpr const T*
 	Span<T>::end() const
 	{
-		return data[len];
+		return &data[len];
 	}
 
 	#if false
@@ -251,15 +251,15 @@ namespace kl
 	}
 
 	template <typename T>
-	constexpr Span<T> Span<T>::next(i64 len) const
+	constexpr Span<T> Span<T>::next(i64 newLen) const
 	{
-		return { len, data + this->len };
+		return { newLen, data + len };
 	}
 
 	template <typename T>
-	constexpr Span<T> Span<T>::prev(i64 len) const
+	constexpr Span<T> Span<T>::prev(i64 newLen) const
 	{
-		return { len, data - len };
+		return { newLen, data - newLen };
 	}
 
 	template <typename T>
@@ -293,7 +293,7 @@ namespace kl
 	constexpr Span<U>
 	Span<T>::as() const
 	{
-		return { len / sizeof(U), reinterpret_cast<U*>(data) };
+		return { i64(len / sizeof(U)), reinterpret_cast<U*>(data) };
 	}
 
 	template <typename T>
@@ -303,6 +303,15 @@ namespace kl
 		using Base = Span<T>;
 		assert(x < Base::len);
 		return move(Base::data[x]);
+	}
+
+	template <typename T>
+	constexpr const T&
+	MoveSpan<T>::operator[] (i64 x) const
+	{
+		using Base = Span<T>;
+		assert(x < Base::len);
+		return Base::data[x];
 	}
 
 	template <typename T>

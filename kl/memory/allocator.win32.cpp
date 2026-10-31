@@ -30,7 +30,7 @@ namespace kl
 		{
 			assert(alloc.bytes.data);
 			i64 userAddr   = i64(alloc.bytes.data);
-			i64 headerAddr = roundDown<i64>(userAddr - sizeof(Header), alignof(Header));
+			i64 headerAddr = roundDown<i64>(userAddr - i64(sizeof(Header)), alignof(Header));
 
 			Header& header = *reinterpret_cast<Header*>(headerAddr);
 			assert(header.typeId == typeId);
@@ -97,7 +97,7 @@ namespace kl
 		assert(isMultipleOf<u32>(allocGranularity, align));
 
 		i64 userOffset   = roundUp<i64>(sizeof(Header), align);
-		i64 headerOffset = roundDown<i64>(userOffset - sizeof(Header), alignof(Header));
+		i64 headerOffset = roundDown<i64>(userOffset - i64(sizeof(Header)), alignof(Header));
 		assert(userOffset   <= maxVal<i64> - reserve);
 		assert(userOffset   <  maxVal<u8>);
 		assert(headerOffset <  maxVal<u8>);
@@ -110,15 +110,15 @@ namespace kl
 		void* allocData = nullptr;
 		if (reserve > commit)
 		{
-			allocData = VirtualAlloc(nullptr, reserve, MEM_RESERVE, PAGE_NOACCESS);
+			allocData = VirtualAlloc(nullptr, u64(reserve), MEM_RESERVE, PAGE_NOACCESS);
 			assertWin32(allocData);
 
-			allocData = VirtualAlloc(allocData, commit, MEM_COMMIT, PAGE_READWRITE);
+			allocData = VirtualAlloc(allocData, u64(commit), MEM_COMMIT, PAGE_READWRITE);
 			assertWin32(allocData);
 		}
 		else
 		{
-			allocData = VirtualAlloc(nullptr, commit, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+			allocData = VirtualAlloc(nullptr, u64(commit), MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
 			assertWin32(allocData);
 		}
 
@@ -149,7 +149,7 @@ namespace kl
 		// NOTE: Address is rounded down to a page boundary
 		// NOTE: When address is specified all touched pages are allocated
 		void* allocData = reinterpret_cast<u8*>(&header) - header.headerOffset;
-		allocData = VirtualAlloc(allocData, size, MEM_COMMIT, PAGE_READWRITE);
+		allocData = VirtualAlloc(allocData, u64(size), MEM_COMMIT, PAGE_READWRITE);
 		assertWin32(allocData);
 
 		header.committed = size;

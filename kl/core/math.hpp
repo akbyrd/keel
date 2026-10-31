@@ -23,15 +23,25 @@ namespace kl
 	template <typename T> constexpr T max(T x, T y);
 	template <typename T> constexpr T clamp(T x, T min, T max);
 
-	template <typename T> constexpr T*  alignUp(T* x);
-	template <typename T> constexpr u8* alignUp(u8* x);
-	template <typename T> constexpr T*  alignDown(T* x);
-	template <typename T> constexpr u8* alignDown(u8* x);
+	// TODO: Consider a constexpr offset version of alignUp/Down for easier testing
+
+	// NOTE: align must be a power of 2
+	// NOTE: aligning up may overflow
+	u8*       alignUp(u8* x, u64 align);
+	const u8* alignUp(const u8* x, u64 align);
+	template <typename T> T*       alignUp(u8* x, u64 align = alignof(T));
+	template <typename T> const T* alignUp(const u8* x, u64 align = alignof(T));
+
+	u8*       alignDown(u8* x, u64 align);
+	const u8* alignDown(const u8* x, u64 align);
+	template <typename T> T*       alignDown(u8* x, u64 align = alignof(T));
+	template <typename T> const T* alignDown(const u8* x, u64 align = alignof(T));
 
 	// TODO: Maybe these should be in a struct? Something like attr<T>?
 	template <typename T> requires (isArithmetic<T>) constexpr T minVal;
 	template <typename T> requires (isArithmetic<T>) constexpr T maxVal;
 	template <typename T> requires (isFloat<T>) constexpr T smallestVal;
+	template <typename T> requires (isFloat<T>) constexpr T smallestDenormVal;
 
 	template <typename T> requires (isFloat<T>) constexpr T pi;
 	template <typename T> requires (isFloat<T>) constexpr T tau;
@@ -79,7 +89,7 @@ namespace kl
 		}
 		#endif
 
-		T result = (x + round - 1) / round * round;
+		T result = T((x + round - 1) / round * round);
 		return result;
 	}
 
@@ -100,7 +110,7 @@ namespace kl
 		}
 		#endif
 
-		T result = x / round * round;
+		T result = T(x / round * round);
 		return result;
 	}
 
@@ -126,43 +136,68 @@ namespace kl
 		return x <= min ? min : x >= max ? max : x;
 	}
 
-	// TODO: Try removing this overload
-	// NOTE: aligning up may overflow
-	template <typename T>
-	constexpr u8* alignUp(u8* x)
+	inline u8*
+	alignUp(u8* x, u64 align)
 	{
-		// NOTE: [basic.align] - alignment is always a power of 2 which is required here.
-		constexpr u64 align = alignof(T);
-		static_assert(isPowerOf2(align));
-
-		u8* result = x + (-i64(x) & (align - 1));
+		assert(isPowerOf2(align));
+		u8* result = x + ((0 - u64(x)) & (align - 1));
 		return result;
 	}
 
-	// NOTE: aligning up may overflow
-	template <typename T>
-	constexpr T* alignUp(T* x)
+	inline const u8*
+	alignUp(const u8* x, u64 align)
 	{
-		T* result = static_cast<T*>(alignUp<T>(static_cast<u8*>(x)));
+		assert(isPowerOf2(align));
+		const u8* result = x + ((0 - u64(x)) & (align - 1));
 		return result;
 	}
 
 	template <typename T>
-	constexpr u8* alignDown(u8* x)
+	T*
+	alignUp(u8* x, u64 align)
 	{
-		// NOTE: [basic.align] - alignment is always a power of 2 which is required here.
-		constexpr u64 align = alignof(T);
-		static_assert(isPowerOf2(align));
+		u8* result = alignUp(x, align);
+		return reinterpret_cast<T*>(result);
+	}
 
-		u8* result = reinterpret_cast<u8*>(u64(x) & ~(align - 1));
+	template <typename T>
+	const T*
+	alignUp(const u8* x, u64 align)
+	{
+		const u8* result = alignUp(x, align);
+		return reinterpret_cast<const T*>(result);
+	}
+
+	inline u8*
+	alignDown(u8* x, u64 align)
+	{
+		assert(isPowerOf2(align));
+		u8* result = x - (u64(x) & (align - 1));
+		return result;
+	}
+
+	inline const u8*
+	alignDown(const u8* x, u64 align)
+	{
+		assert(isPowerOf2(align));
+		const u8* result = x - (u64(x) & (align - 1));
 		return result;
 	}
 
 	template <typename T>
-	constexpr T* alignDown(T* x)
+	T*
+	alignDown(u8* x, u64 align)
 	{
-		T* result = static_cast<T*>(alignDown<T>(static_cast<u8*>(x)));
-		return result;
+		u8* result = alignDown(x, align);
+		return reinterpret_cast<T*>(result);
+	}
+
+	template <typename T>
+	const T*
+	alignDown(const u8* x, u64 align)
+	{
+		const u8* result = alignDown(x, align);
+		return reinterpret_cast<const T*>(result);
 	}
 
 	template <> constexpr inline u8  minVal<u8>  = 0;
@@ -190,15 +225,16 @@ namespace kl
 	template <> constexpr inline c8  maxVal<c8>  = isSigned<c8> ? 0x7F : 0xFF;
 
 	// TODO: Consider a "make float" function
-	template <> constexpr inline f32 smallestVal<f32> = 0x0080'0000;
-	template <> constexpr inline f64 smallestVal<f64> = 0x0010'0000'0000'0000;
-
-	template <> constexpr inline f32 pi<f32>          = 3.14159265358979323f;
-	template <> constexpr inline f64 pi<f64>          = 3.14159265358979323;
-	template <> constexpr inline f32 tau<f32>         = 6.28318530717958647f;
-	template <> constexpr inline f64 tau<f64>         = 6.28318530717958647;
-	template <> constexpr inline f32 goldenRatio<f32> = 1.61803398874989484f;
-	template <> constexpr inline f64 goldenRatio<f64> = 1.61803398874989484;
+	template <> constexpr inline f32 smallestVal<f32>       = __builtin_bit_cast(f32, 0x0080'0000);
+	template <> constexpr inline f64 smallestVal<f64>       = __builtin_bit_cast(f64, 0x0010'0000'0000'0000);
+	template <> constexpr inline f32 smallestDenormVal<f32> = __builtin_bit_cast(f32, u32(0x0000'0001));
+	template <> constexpr inline f64 smallestDenormVal<f64> = __builtin_bit_cast(f64, u64(0x0000'0000'0000'0001));
+	template <> constexpr inline f32 pi<f32>                = 3.14159265358979323f;
+	template <> constexpr inline f64 pi<f64>                = 3.14159265358979323;
+	template <> constexpr inline f32 tau<f32>               = 6.28318530717958647f;
+	template <> constexpr inline f64 tau<f64>               = 6.28318530717958647;
+	template <> constexpr inline f32 goldenRatio<f32>       = 1.61803398874989484f;
+	template <> constexpr inline f64 goldenRatio<f64>       = 1.61803398874989484;
 }
 
 #include "kl/core/math.win32.hpp" // IWYU pragma: export
