@@ -62,11 +62,11 @@ namespace kl
 	// TODO: Pack
 	struct Arena::Meta
 	{
-		i32   id;
-		i64   size;
-		i32   offset;
-		i64   count;
-		Meta* prevMeta;
+		TypeId id;
+		i64    size;
+		i32    offset;
+		i64    count;
+		Meta*  prevMeta;
 
 		using DestructFn = void(Span<u8>);
 		DestructFn* destruct;
@@ -188,7 +188,7 @@ namespace kl
 		{
 			static_assert(TypeInfo<T>::align <= sizeof(Meta::offset));
 
-			if (!lastMeta || lastMeta->id != id<T>)
+			if (!lastMeta || lastMeta->id.val != id<T>.val)
 			{
 				Span<Meta> metas = pushArray<Meta>(1, NoInit {});
 				u8* dst = alignUp<T>(alloc.bytes.data + used);

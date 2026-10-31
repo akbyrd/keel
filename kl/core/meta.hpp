@@ -1,35 +1,43 @@
 #pragma once
 
 #include "kl/containers/span.hpp"
+#include "kl/core/compiler.hpp"
+#include "kl/core/hash.hpp"
 #include "kl/core/math.hpp"
 #include "kl/memory/lifetime.hpp"
 
 namespace kl
 {
+	// TODO: Operators? Base class for strongly typed integers?
 	struct TypeId
 	{
-		u32 val;
+		u64 val;
 	};
 
+	// TODO: Replace with build system generated ids that are guaranteed unique.
 	template <typename T>
-	constexpr TypeId id = []()
+	constexpr TypeId _typeId()
 	{
-		// TODO: Want this to be random for better hashing, but guaranteed not to conflict.
-		// Need build system support.
-		// Generate hashes and confirm unique
-		// What stability properties are required?
-		// Seed with local path? Project name? Custom?
-		static constinit u32 count = 0;
-		assert(count < maxVal<u32>);
-		return TypeId { ++count };
-	}();
+		constexpr const c8* sig = KL_FUNCTION_SIGNATURE;
+		constexpr i64       len = i64(__builtin_strlen(sig));
+
+		// NOTE: Copy to bytes because reinterpret_cast is not allowed in constant evaluation
+		u8 bytes[len] = {};
+		for (i64 i = 0; i < len; ++i)
+			bytes[i] = u8(sig[i]);
+
+		return TypeId { hashFnv1a(Span<const u8> { len, bytes }) };
+	}
+
+	template <typename T>
+	constexpr TypeId id = _typeId<T>();
 
 	template <typename T>
 	struct TypeInfo
 	{
-		static constexpr u32 id    = kl::id<T>;
-		static constexpr u32 align = alignof(T); // TODO: Might need to be signed for mismatches
-		static constexpr u64 size  = sizeof(T);  // TODO: Might need to be signed for mismatches
+		static constexpr TypeId id    = kl::id<T>;
+		static constexpr u32    align = alignof(T); // TODO: Might need to be signed for mismatches
+		static constexpr u64    size  = sizeof(T);  // TODO: Might need to be signed for mismatches
 
 		// TODO: Overloads are awkward here
 		using DefaultConstructFn = void(Span<T> dst);

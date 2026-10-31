@@ -7,6 +7,9 @@
 #undef  KL_COMPILER_CLANG
 #define KL_COMPILER_CLANG true
 
+// Full signature of the enclosing function, including template arguments
+#define KL_FUNCTION_SIGNATURE __PRETTY_FUNCTION__
+
 namespace kl
 {
 	constexpr Compiler compiler = Compiler::clang;
