@@ -2,32 +2,41 @@
 
 #include "kl/core/types.hpp"
 
+// TODO: Try to forward declare traits and move the implementation out of the way.
 namespace kl
 {
-	template <typename T> struct _removeC                   { using Type = T; };
-	template <typename T> struct _removeC<const T>          { using Type = T; };
-	template <typename T> using removeC = typename _removeC<T>::Type;
-
-	template <typename T> struct _removeV                   { using Type = T; };
-	template <typename T> struct _removeV<volatile T>       { using Type = T; };
-	template <typename T> using removeV = typename _removeV<T>::Type;
-
-	template <typename T> struct _removeCV                   { using Type = T; };
-	template <typename T> struct _removeCV<const T>          { using Type = T; };
-	template <typename T> struct _removeCV<volatile T>       { using Type = T; };
-	template <typename T> struct _removeCV<const volatile T> { using Type = T; };
-	template <typename T> using removeCV = typename _removeCV<T>::Type;
-
-	template <typename T> struct _removeRef      { using Type = T; };
-	template <typename T> struct _removeRef<T&>  { using Type = T; };
-	template <typename T> struct _removeRef<T&&> { using Type = T; };
-	template <typename T> using removeRef = typename _removeRef<T>::Type;
-
 	template <typename T, typename U>          constexpr b8 isSame                          = false;
 	template <typename T>                      constexpr b8 isSame<T, T>                    = true;
 	template <typename T, typename... Us>      constexpr b8 isAnyOf                         = (isSame<T, Us> || ...);
 	template <typename T>                      constexpr b8 isConst                         = false;
 	template <typename T>                      constexpr b8 isConst<const T>                = true;
+	template <typename T>                      constexpr b8 isVolatile                      = false;
+	template <typename T>                      constexpr b8 isVolatile<volatile T>          = true;
+
+	template <b8 C, typename T, typename F> struct _select              { using Type = T; };
+	template <typename T, typename F>       struct _select<false, T, F> { using Type = F; };
+	template <typename T>                   struct _removeC             { using Type = T; };
+	template <typename T>                   struct _removeC<const T>    { using Type = T; };
+	template <typename T>                   struct _removeV             { using Type = T; };
+	template <typename T>                   struct _removeV<volatile T> { using Type = T; };
+	template <typename T>                   struct _removeRef           { using Type = T; };
+	template <typename T>                   struct _removeRef<T&>       { using Type = T; };
+	template <typename T>                   struct _removeRef<T&&>      { using Type = T; };
+	template <typename Dst, typename Src>   struct _copyRef             { using Type = Dst; };
+	template <typename Dst, typename Src>   struct _copyRef<Dst, Src&>  { using Type = Dst&; };
+	template <typename Dst, typename Src>   struct _copyRef<Dst, Src&&> { using Type = Dst&&; };
+
+	template <b8 C, typename T, typename F> using select      = typename _select<C, T, F>::Type;
+	template <typename T>                   using removeC     = typename _removeC<T>::Type;
+	template <typename T>                   using removeV     = typename _removeV<T>::Type;
+	template <typename T>                   using removeCV    = removeC<removeV<T>>;
+	template <typename T>                   using removeRef   = typename _removeRef<T>::Type;
+	template <typename T>                   using removeCVRef = removeCV<removeRef<T>>;
+	template <typename Dst, typename Src>   using copyC       = select<isConst<Src>,    const Dst,    Dst>;
+	template <typename Dst, typename Src>   using copyV       = select<isVolatile<Src>, volatile Dst, Dst>;
+	template <typename Dst, typename Src>   using copyCV      = copyC<copyV<Dst, Src>, Src>;
+	template <typename Dst, typename Src>   using copyRef     = typename _copyRef<Dst, Src>::Type;
+	template <typename Dst, typename Src>   using copyCVRef   = copyRef<copyCV<Dst, removeRef<Src>>, Src>;
 
 	// fundamental
 	//   arithmetic
@@ -119,7 +128,6 @@ namespace kl
 	#if false
 	isScalar
 	isObject
-	isVolatile
 	isImplicitLifetime
 	isBoundedArray
 	isUnboundedArray
@@ -143,7 +151,6 @@ namespace kl
 	alignedStorage
 	alignedUnion
 	decay
-	conditional
 	commonType
 	commonReference
 	basicCommonReference
