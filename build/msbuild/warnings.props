@@ -7,6 +7,9 @@
       <!-- C4514: unreferenced inline function has been removed. -->
       <DisableSpecificWarnings>4514;%(DisableSpecificWarnings)</DisableSpecificWarnings>
 
+      <!-- C4710: Function not inlined. -->
+      <DisableSpecificWarnings>4710;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+
       <!-- C4711: Function selected for automatic inlining. -->
       <DisableSpecificWarnings>4711;%(DisableSpecificWarnings)</DisableSpecificWarnings>
 

@@ -7,7 +7,8 @@
 
 namespace kl
 {
-	template <typename T> constexpr Span<u8> toBytes(T& x);
+	template <typename T> requires (!isConst<T>) constexpr Span<u8> toBytes(T& x);
+	template <typename T>                        constexpr Span<const u8> toBytes(const T& x);
 
 	constexpr void clearBytes (Span<u8> dst);
 	constexpr void fillBytes  (Span<u8> dst, u8 src);
@@ -21,10 +22,18 @@ namespace kl
 namespace kl
 {
 	template <typename T>
+		requires (!isConst<T>)
 	constexpr Span<u8>
 	toBytes(T& x)
 	{
-		return { sizeof(x), &x };
+		return { i64(sizeof(x)), reinterpret_cast<u8*>(&x) };
+	}
+
+	template <typename T>
+	constexpr Span<const u8>
+	toBytes(const T& x)
+	{
+		return { i64(sizeof(x)), reinterpret_cast<const u8*>(&x) };
 	}
 }
 

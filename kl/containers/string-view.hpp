@@ -53,7 +53,7 @@ namespace kl
 		CStringView() = default;
 
 		constexpr explicit CStringView(const c8* x)
-			: len(__builtin_strlen(x))
+			: len(i64(__builtin_strlen(x)))
 			, data(x)
 		{}
 

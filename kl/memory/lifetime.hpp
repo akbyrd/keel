@@ -72,7 +72,7 @@ namespace kl
 	constexpr void
 	defaultConstruct(Span<T> dst)
 	{
-		new (dst.data, PlacementTag{}) T[dst.len];
+		new (dst.data, PlacementTag{}) T[u64(dst.len)];
 	}
 
 	template <typename T>
@@ -86,14 +86,14 @@ namespace kl
 	constexpr void
 	valueConstruct(Span<T> dst)
 	{
-		new (dst.data, PlacementTag{}) T[dst.len] {};
+		new (dst.data, PlacementTag{}) T[u64(dst.len)]{};
 	}
 
 	template <typename T>
 	constexpr void
 	copyConstruct(T& dst, const T& src)
 	{
-		assert(&dst != src);
+		assert(&dst != &src);
 		new (&dst, PlacementTag{}) T { src };
 	}
 
@@ -102,7 +102,7 @@ namespace kl
 	copyConstruct(Span<T> dst, const T& src)
 	{
 		assert(!dst.overlaps(src));
-		new (dst.data, PlacementTag{}) T[dst.len] { src };
+		new (dst.data, PlacementTag{}) T[u64(dst.len)]{ src };
 	}
 
 	// TODO: Is this correct? (check all type traits in this file)
@@ -142,7 +142,7 @@ namespace kl
 		// TODO: move or forward?
 		new (dst.data, PlacementTag{}) T { move(src) };
 		if (dst.len > 1)
-			new (&dst.data[1], PlacementTag{}) T[dst.len - 1] { dst.data[0] };
+			new (&dst.data[1], PlacementTag{}) T[u64(dst.len - 1)]{ dst.data[0] };
 	}
 
 	// TODO: Is this correct? (check all type traits in this file)
@@ -219,12 +219,12 @@ namespace kl
 	{
 		// TODO: Use isTriviallyMoveAssignable
 
-		assert(dst.len >= src.len);
+		assert(dst.len >= sizeof(src));
 		assert(!dst.overlaps(src));
 
 		// TODO: move or forward?
 		dst[0] = move(src);
-		for (i64 i = 1; i < src.len; ++i)
+		for (i64 i = 1; i < dst.len; ++i)
 			dst.data[i] = dst.data[0];
 	}
 
