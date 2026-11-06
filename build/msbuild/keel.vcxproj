@@ -25,9 +25,11 @@
     <ClInclude Include="..\..\kl\containers\string-view.hpp" />
     <ClInclude Include="..\..\kl\core\compiler.clang-cl.hpp" />
     <ClInclude Include="..\..\kl\core\compiler.clang.hpp" />
+    <ClInclude Include="..\..\kl\core\compiler.gcc.hpp" />
     <ClInclude Include="..\..\kl\core\compiler.hpp" />
     <ClInclude Include="..\..\kl\core\compiler.msvc.hpp" />
     <ClInclude Include="..\..\kl\core\debug.clang.hpp" />
+    <ClInclude Include="..\..\kl\core\debug.gcc.hpp" />
     <ClInclude Include="..\..\kl\core\debug.hpp" />
     <ClInclude Include="..\..\kl\core\debug.msvc.hpp" />
     <ClInclude Include="..\..\kl\core\hash.hpp" />
@@ -38,8 +40,12 @@
     <ClInclude Include="..\..\kl\core\meta.hpp" />
     <ClInclude Include="..\..\kl\core\move.hpp" />
     <ClInclude Include="..\..\kl\core\platform.hpp" />
+    <ClInclude Include="..\..\kl\core\platform.linux.hpp" />
     <ClInclude Include="..\..\kl\core\platform.win32.hpp" />
+    <ClInclude Include="..\..\kl\core\traits.clang.hpp" />
+    <ClInclude Include="..\..\kl\core\traits.gcc.hpp" />
     <ClInclude Include="..\..\kl\core\traits.hpp" />
+    <ClInclude Include="..\..\kl\core\traits.msvc.hpp" />
     <ClInclude Include="..\..\kl\core\types.hpp" />
     <ClInclude Include="..\..\kl\core\win32.hpp" />
     <ClInclude Include="..\..\kl\memory\allocator.hpp" />

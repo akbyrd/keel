@@ -1,6 +1,11 @@
 #pragma once
 
 #include "kl/containers/span.hpp"
+#include "kl/containers/span.hpp"
+//#include "kl/core/debug.hpp"
+
+// -------------------------------------------------------------------------------------------------
+// Interface
 
 namespace kl
 {
@@ -52,14 +57,51 @@ namespace kl
 
 		CStringView() = default;
 
-		constexpr explicit CStringView(const c8* x)
-			: len(i64(__builtin_strlen(x)))
-			, data(x)
-		{}
+		template <i64 N> constexpr CStringView(const c8 (&x)[N]);
+		constexpr explicit CStringView(const c8* x);
 
-		constexpr operator StringView() const { return { len, data }; }
-		constexpr operator Span<const c8>() const { return { len, data }; }
+		constexpr operator StringView() const;
+		constexpr operator Span<const c8>() const;
 
-		constexpr const c8& operator[](i64 x) const { return data[x]; }
+		constexpr const c8& operator[](i64 x) const;
 	};
+}
+
+// -------------------------------------------------------------------------------------------------
+// Implementation
+
+namespace kl
+{
+	template <i64 N>
+	constexpr
+	CStringView::CStringView(const c8 (&x)[N])
+		: len(N - 1)
+		, data(x)
+	{
+		assert(x[N - 1] == 0);
+	}
+
+	constexpr
+	CStringView::CStringView(const c8* x)
+		: len(i64(__builtin_strlen(x)))
+		, data(x)
+	{}
+
+	constexpr
+	CStringView::operator StringView() const
+	{
+		return { len, data };
+	}
+
+	constexpr
+	CStringView::operator Span<const c8>() const
+	{
+		return { len, data };
+	}
+
+	constexpr const c8&
+	CStringView::operator[](i64 x) const
+	{
+		return data[x];
+	}
 }

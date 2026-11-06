@@ -266,7 +266,7 @@ namespace kl
 	constexpr bool
 	Span<T>::overlaps(Span<const T> x) const
 	{
-		return data >= x.data + x.len || x.data >= data + len;
+		return data < x.data + x.len && x.data < data + len;
 	}
 
 	template <typename T>

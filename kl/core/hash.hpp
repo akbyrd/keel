@@ -2,16 +2,13 @@
 
 #include "kl/containers/span.hpp"
 
+// TODO: This is temporary. Needs a proper design.
+
 // -------------------------------------------------------------------------------------------------
 // Interface
 
 namespace kl
 {
-	// NOTE: FNV-1a is inherently serial (each byte depends on the previous result) so it cannot be
-	// vectorized. It's meant for short keys and compile time hashing. A SIMD hash would be a separate
-	// algorithm with the same shape.
-	// NOTE: Pass the result of a previous hash as the seed to hash multiple spans as if they were
-	// contiguous.
 	constexpr u64 hashFnv1a(Span<const u8> bytes);
 	constexpr u64 hashFnv1a(Span<const u8> bytes, u64 seed);
 }

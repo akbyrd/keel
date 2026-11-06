@@ -3,7 +3,7 @@
 #include "kl/containers/span.hpp"
 #include "kl/core/move.hpp"
 #include "kl/core/traits.hpp"
-#include "kl/memory/bytes.hpp"
+#include "kl/memory/bytes.hpp" // TODO: Why does this show up as unused?
 
 // -------------------------------------------------------------------------------------------------
 // Interface
@@ -33,6 +33,8 @@ namespace kl
 	template <typename T> constexpr void destruct(Span<T> dst);
 	template <typename T> constexpr void relocate(T& dst, T&& src);
 	template <typename T> constexpr void relocate(Span<T> dst, MoveSpan<T> src);
+
+	template <typename T, typename U> requires (!isSame<T, U>) constexpr void convertAssign(Span<T> dst, Span<const U> src);
 
 	struct PlacementTag {};
 }
@@ -298,5 +300,32 @@ namespace kl
 			dst.data[i] = move(src.data[i]);
 			destruct(src.data[i]);
 		}
+	}
+
+	template <typename T, typename U>
+		requires (!isSame<T, U>)
+	constexpr void
+	convertAssign(Span<T> dst, Span<const U> src)
+	{
+		assert(dst.len >= src.len);
+
+		#if true
+		for (i64 i = 0; i < src.len; ++i)
+			dst.data[i] = static_cast<T>(src.data[i]);
+		#else
+		if (isConstantEvaluated())
+		{
+			for (i64 i = 0; i < src.len; ++i)
+				dst.data[i] = static_cast<T>(src.data[i]);
+		}
+		else
+		{
+			// TODO: constexpr? bitcast?
+			//if constexpr (isTriviallyCopyAssignable<T>)
+			//{
+			//	copyBytes(dst.asBytes(), src.asBytes());
+			//}
+		}
+		#endif
 	}
 }

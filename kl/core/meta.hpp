@@ -3,8 +3,9 @@
 #include "kl/containers/span.hpp"
 #include "kl/core/compiler.hpp"
 #include "kl/core/hash.hpp"
-#include "kl/core/math.hpp"
 #include "kl/memory/lifetime.hpp"
+
+// TODO: Rename to type-info?
 
 namespace kl
 {
@@ -14,19 +15,22 @@ namespace kl
 		u64 val;
 	};
 
-	// TODO: Replace with build system generated ids that are guaranteed unique.
+	// TODO: Replace this with build system generated data. Hashing at compile time is slow (best
+	// case 170 us per id on msvc) and this approach isn't stable across compilers.
 	template <typename T>
 	constexpr TypeId _typeId()
 	{
-		constexpr const c8* sig = KL_FUNCTION_SIGNATURE;
-		constexpr i64       len = i64(__builtin_strlen(sig));
+		#if KL_COMPILER_MSVC || KL_COMPILER_CLANG_CL
+		// NOTE: Includes the null terminator but that's ok
+		u8 name[] = { __FUNCSIG__ };
+		#else
+		constexpr Span<const c8> chars = __PRETTY_FUNCTION__;
+		u8 name[chars.len];
+		convertAssign<u8>(name, chars);
+		#endif
 
-		// NOTE: Copy to bytes because reinterpret_cast is not allowed in constant evaluation
-		u8 bytes[len] = {};
-		for (i64 i = 0; i < len; ++i)
-			bytes[i] = u8(sig[i]);
-
-		return TypeId { hashFnv1a(Span<const u8> { len, bytes }) };
+		u64 hash = hashFnv1a(name);
+		return TypeId { hash };
 	}
 
 	template <typename T>
@@ -36,8 +40,8 @@ namespace kl
 	struct TypeInfo
 	{
 		static constexpr TypeId id    = kl::id<T>;
-		static constexpr u32    align = alignof(T); // TODO: Might need to be signed for mismatches
-		static constexpr u64    size  = sizeof(T);  // TODO: Might need to be signed for mismatches
+		static constexpr u32    align = alignof(T);
+		static constexpr u64    size  = sizeof(T);
 
 		// TODO: Overloads are awkward here
 		using DefaultConstructFn = void(Span<T> dst);
@@ -76,4 +80,12 @@ namespace kl
 		using MoveAssignFn = void(Span<T> dst, MoveSpan<T> src);
 		static constexpr MoveAssignFn* moveAssign = &kl::moveAssign<T>;
 	};
+}
+
+// -------------------------------------------------------------------------------------------------
+// Implementation
+
+namespace kl
+{
+	constexpr TypeId id_i64 = id<i64>;
 }

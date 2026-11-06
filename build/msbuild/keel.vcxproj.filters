@@ -44,6 +44,9 @@
     <ClInclude Include="..\..\kl\core\compiler.clang.hpp">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\kl\core\compiler.gcc.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\kl\core\compiler.hpp">
       <Filter>Core</Filter>
     </ClInclude>
@@ -51,6 +54,9 @@
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\kl\core\debug.clang.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\kl\core\debug.gcc.hpp">
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\kl\core\debug.hpp">
@@ -83,10 +89,22 @@
     <ClInclude Include="..\..\kl\core\platform.hpp">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\kl\core\platform.linux.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\kl\core\platform.win32.hpp">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\kl\core\traits.clang.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\kl\core\traits.gcc.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\kl\core\traits.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\kl\core\traits.msvc.hpp">
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\kl\core\types.hpp">

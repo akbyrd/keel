@@ -55,6 +55,7 @@ namespace kl
 	{
 		if (isConstantEvaluated())
 		{
+			// Do nothing
 		}
 		else
 		{

@@ -8,6 +8,7 @@ namespace kl
 	{
 		clang,
 		clang_cl,
+		gcc,
 		msvc,
 	};
 
@@ -19,15 +20,18 @@ namespace kl
 
 #define KL_COMPILER_CLANG    false
 #define KL_COMPILER_CLANG_CL false
+#define KL_COMPILER_GCC      false
 #define KL_COMPILER_MSVC     false
 
 #include "kl/core/compiler.clang.hpp"    // IWYU pragma: export
 #include "kl/core/compiler.clang-cl.hpp" // IWYU pragma: export
+#include "kl/core/compiler.gcc.hpp"      // IWYU pragma: export
 #include "kl/core/compiler.msvc.hpp"     // IWYU pragma: export
 
 #if \
-	!defined(KL_COMPILER_CLANG) && \
-	!defined(KL_COMPILER_CLANG_CL) && \
-	!defined(KL_COMPILER_MSVC)
+	!KL_COMPILER_CLANG && \
+	!KL_COMPILER_CLANG_CL && \
+	!KL_COMPILER_GCC && \
+	!KL_COMPILER_MSVC
 	#error "Unsupported compiler"
 #endif

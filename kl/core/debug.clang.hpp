@@ -5,6 +5,7 @@
 #if KL_COMPILER_CLANG
 
 #include "kl/core/debug.hpp"
+#include "kl/core/traits.hpp"
 
 namespace kl
 {
@@ -13,6 +14,9 @@ namespace kl
 	{
 		if (!condition)
 		{
+			// NOTE: The compiler assumes you can never continue past __builtin_trap. This could cause
+			// problems when debugging.
+
 			__builtin_debugtrap();
 			__builtin_trap();
 		}
@@ -21,7 +25,14 @@ namespace kl
 	constexpr void
 	debugBreak()
 	{
-		__builtin_debugtrap();
+		if (isConstantEvaluated())
+		{
+			// Do nothing
+		}
+		else
+		{
+			__builtin_debugtrap();
+		}
 	}
 }
 

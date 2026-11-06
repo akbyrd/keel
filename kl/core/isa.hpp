@@ -16,6 +16,6 @@ namespace kl
 
 #include "kl/core/isa.x64.hpp" // IWYU pragma: export
 
-#if !defined(KL_ISA_X64)
+#if !KL_ISA_X64
 	#error "Unsupported instruction set"
 #endif

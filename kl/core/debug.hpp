@@ -12,6 +12,7 @@ namespace kl
 }
 
 #include "kl/core/debug.clang.hpp" // IWYU pragma: export
+#include "kl/core/debug.gcc.hpp"   // IWYU pragma: export
 #include "kl/core/debug.msvc.hpp"  // IWYU pragma: export
 
 // -------------------------------------------------------------------------------------------------
