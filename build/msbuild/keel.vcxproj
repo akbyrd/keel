@@ -23,6 +23,8 @@
     <ClInclude Include="..\..\kl\containers\arena.hpp" />
     <ClInclude Include="..\..\kl\containers\span.hpp" />
     <ClInclude Include="..\..\kl\containers\string-view.hpp" />
+    <ClInclude Include="..\..\kl\core\bits.hpp" />
+    <ClInclude Include="..\..\kl\core\bits.test.hpp" />
     <ClInclude Include="..\..\kl\core\compiler.clang-cl.hpp" />
     <ClInclude Include="..\..\kl\core\compiler.clang.hpp" />
     <ClInclude Include="..\..\kl\core\compiler.gcc.hpp" />
@@ -36,7 +38,6 @@
     <ClInclude Include="..\..\kl\core\isa.hpp" />
     <ClInclude Include="..\..\kl\core\isa.x64.hpp" />
     <ClInclude Include="..\..\kl\core\math.hpp" />
-    <ClInclude Include="..\..\kl\core\math.win32.hpp" />
     <ClInclude Include="..\..\kl\core\meta.hpp" />
     <ClInclude Include="..\..\kl\core\move.hpp" />
     <ClInclude Include="..\..\kl\core\platform.hpp" />
@@ -47,10 +48,10 @@
     <ClInclude Include="..\..\kl\core\traits.hpp" />
     <ClInclude Include="..\..\kl\core\traits.msvc.hpp" />
     <ClInclude Include="..\..\kl\core\types.hpp" />
+    <ClInclude Include="..\..\kl\core\types.test.hpp" />
     <ClInclude Include="..\..\kl\core\win32.hpp" />
     <ClInclude Include="..\..\kl\memory\allocator.hpp" />
     <ClInclude Include="..\..\kl\memory\bytes.hpp" />
-    <ClInclude Include="..\..\kl\memory\bytes.msvc.hpp" />
     <ClInclude Include="..\..\kl\memory\lifetime.hpp" />
   </ItemGroup>
   <ItemGroup>

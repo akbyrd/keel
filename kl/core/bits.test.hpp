@@ -1,60 +1,6 @@
 #pragma once
 
-#include "kl/core/platform.hpp"
-
-#if KL_PLATFORM_WIN32
-
-#include "kl/core/math.hpp"
-#include <intrin.h>
-
-namespace kl
-{
-	template <typename T>
-		requires (isUnsignedInteger<T>)
-	constexpr u8 countSetBits(T x)
-	{
-		static_assert(sizeof(T) <= 8, "Size of type is not supported");
-
-		if (isConstantEvaluated())
-		{
-			// https://graphics.stanford.edu/~seander/bithacks.html#CountBitsSetParallel
-			// https://en.wikipedia.org/wiki/Hamming_weight
-			constexpr T h01 = T(~T(0)) / 0xFF;
-			constexpr T m1  = h01 * 0b0101'0101;
-			constexpr T m2  = h01 * 0b0011'0011;
-			constexpr T m4  = h01 * 0b0000'1111;
-
-			x = T( x       - ((x >> 1)  & m1));
-			x = T((x & m2) + ((x >> 2)  & m2));
-			x = T((x       +  (x >> 4)) & m4);
-			u8 count = u8((x * h01) >> (sizeof(T) - 1) * 8);
-			return count;
-		}
-		else
-		{
-			if constexpr (sizeof(T) <= 2)
-			{
-				u8 result = u8(__popcnt16(x));
-				return result;
-			}
-			else if constexpr (sizeof(T) <= 4)
-			{
-				u8 result = u8(__popcnt(x));
-				return result;
-			}
-			else if constexpr (sizeof(T) <= 8)
-			{
-				u8 result = u8(__popcnt64(x));
-				return result;
-			}
-		}
-	}
-}
-
-#endif
-
-// -------------------------------------------------------------------------------------------------
-// Tests
+#include "kl/core/bits.hpp"
 
 namespace kl
 {

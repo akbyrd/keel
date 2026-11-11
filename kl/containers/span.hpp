@@ -55,6 +55,7 @@ namespace kl
 		constexpr Span<T> prev (i64 newLen) const;
 
 		constexpr bool overlaps(Span<const T> x) const;
+		template <typename U> constexpr bool overlaps(Span<const U> x) const;
 
 		constexpr Span<u8> asBytes() requires (!isConst<T>);
 		constexpr Span<const u8> asBytes() const;
@@ -251,13 +252,15 @@ namespace kl
 	}
 
 	template <typename T>
-	constexpr Span<T> Span<T>::next(i64 newLen) const
+	constexpr Span<T>
+	Span<T>::next(i64 newLen) const
 	{
 		return { newLen, data + len };
 	}
 
 	template <typename T>
-	constexpr Span<T> Span<T>::prev(i64 newLen) const
+	constexpr Span<T>
+	Span<T>::prev(i64 newLen) const
 	{
 		return { newLen, data - newLen };
 	}
@@ -266,7 +269,39 @@ namespace kl
 	constexpr bool
 	Span<T>::overlaps(Span<const T> x) const
 	{
+		if (isConstantEvaluated())
+		{
+			#if KL_COMPILER_MSVC
+			// NOTE: https://github.com/microsoft/STL/blob/4beaa647de4fd8ae5807be7e158965b85aa87c6b/stl/inc/__msvc_string_view.hpp#L251
+			for (i64 i = 0; i < len; ++i)   if (data + i == x.data) return true;
+			for (i64 i = 0; i < x.len; ++i) if (x.data + i == data) return true;
+			return false;
+
+			#else
+			if (!__builtin_constant_p(data < x.data))
+				return false;
+			#endif
+		}
+
 		return data < x.data + x.len && x.data < data + len;
+	}
+
+	template <typename T>
+	template <typename U>
+	constexpr bool
+	Span<T>::overlaps(Span<const U> x) const
+	{
+		if constexpr (isSame<removeC<T>, U>)
+			return overlaps(x);
+
+		if (isConstantEvaluated())
+		{
+			return false;
+		}
+		else
+		{
+			return asBytes().overlaps(x.asBytes());
+		}
 	}
 
 	template <typename T>

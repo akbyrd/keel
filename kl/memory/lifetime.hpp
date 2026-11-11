@@ -1,9 +1,10 @@
 #pragma once
 
 #include "kl/containers/span.hpp"
+#include "kl/core/bits.hpp"
 #include "kl/core/move.hpp"
 #include "kl/core/traits.hpp"
-#include "kl/memory/bytes.hpp" // TODO: Why does this show up as unused?
+#include "kl/memory/bytes.hpp"
 
 // -------------------------------------------------------------------------------------------------
 // Interface
@@ -34,12 +35,13 @@ namespace kl
 	template <typename T> constexpr void relocate(T& dst, T&& src);
 	template <typename T> constexpr void relocate(Span<T> dst, MoveSpan<T> src);
 
-	template <typename T, typename U> requires (!isSame<T, U>) constexpr void convertAssign(Span<T> dst, Span<const U> src);
+	template <typename T, typename U>                                    constexpr void convertAssign(Span<T> dst, Span<const U> src);
+	template <typename T, typename U> requires (isReinterpretable<T, U>) constexpr void reinterpretAssign(Span<T> dst, Span<const U> src);
 
 	struct PlacementTag {};
 }
 
-inline void* operator new   (kl::u64, void* x, kl::PlacementTag) { return x; }
+inline void* operator new   (kl::ux, void* x, kl::PlacementTag) { return x; }
 inline void  operator delete(void*, void*, kl::PlacementTag) {}
 
 // -------------------------------------------------------------------------------------------------
@@ -252,6 +254,20 @@ namespace kl
 
 	template <typename T>
 	constexpr void
+	destruct(T& dst)
+	{
+		if constexpr (isTriviallyDestructible<T>)
+		{
+			// Nothing to do
+		}
+		else
+		{
+			dst.~T();
+		}
+	}
+
+	template <typename T>
+	constexpr void
 	destruct(Span<T> dst)
 	{
 		if constexpr (isTriviallyDestructible<T>)
@@ -262,20 +278,6 @@ namespace kl
 		{
 			for (T& x : dst)
 				x.~T();
-		}
-	}
-
-	template <typename T>
-	constexpr void
-	destruct(T& dst)
-	{
-		if constexpr (isTriviallyDestructible<T>)
-		{
-			// Nothing to do
-		}
-		else
-		{
-			dst.~T();
 		}
 	}
 
@@ -303,29 +305,32 @@ namespace kl
 	}
 
 	template <typename T, typename U>
-		requires (!isSame<T, U>)
 	constexpr void
 	convertAssign(Span<T> dst, Span<const U> src)
 	{
 		assert(dst.len >= src.len);
+		assert(!dst.overlaps(src));
 
-		#if true
 		for (i64 i = 0; i < src.len; ++i)
 			dst.data[i] = static_cast<T>(src.data[i]);
-		#else
+	}
+
+	template <typename T, typename U>
+		requires (isReinterpretable<T, U>)
+	constexpr void
+	reinterpretAssign(Span<T> dst, Span<const U> src)
+	{
 		if (isConstantEvaluated())
 		{
+			assert(dst.len >= src.len);
+			assert(!dst.overlaps(src));
+
 			for (i64 i = 0; i < src.len; ++i)
-				dst.data[i] = static_cast<T>(src.data[i]);
+				dst.data[i] = bitCast<T>(src.data[i]);
 		}
 		else
 		{
-			// TODO: constexpr? bitcast?
-			//if constexpr (isTriviallyCopyAssignable<T>)
-			//{
-			//	copyBytes(dst.asBytes(), src.asBytes());
-			//}
+			copyBytes(dst.asBytes(), src.asBytes());
 		}
-		#endif
 	}
 }

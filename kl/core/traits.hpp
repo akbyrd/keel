@@ -63,8 +63,8 @@ namespace kl
 
 	template <typename T>                      constexpr b8 isBool                          = isAnyOf<removeCV<T>, b8>;
 	template <typename T>                      constexpr b8 isCharacter                     = isAnyOf<removeCV<T>, c8, cw, utf8, utf16, utf32>;
-	template <typename T>                      constexpr b8 isSignedInteger                 = isAnyOf<removeCV<T>, i8, i16, i32, i64, signed long>;
-	template <typename T>                      constexpr b8 isUnsignedInteger               = isAnyOf<removeCV<T>, u8, u16, u32, u64, unsigned long>;
+	template <typename T>                      constexpr b8 isSignedInteger                 = isAnyOf<removeCV<T>, i8, i16, i32, i64, signed long, signed long long>;
+	template <typename T>                      constexpr b8 isUnsignedInteger               = isAnyOf<removeCV<T>, u8, u16, u32, u64, unsigned long, unsigned long long>;
 	template <typename T>                      constexpr b8 isFloat                         = isAnyOf<removeCV<T>, f32, f64, long double>;
 	template <typename T>                      constexpr b8 isVoid                          = isAnyOf<removeCV<T>, void>;
 	template <typename T>                      constexpr b8 isNull                          = isAnyOf<removeCV<T>, null>;
@@ -170,7 +170,6 @@ namespace kl
 	//rank
 	//extent
 	//__builtin_addressof(_Val)
-	//__builtin_bit_cast(_To, _Val)
 	//__underlying_type(_Ty)
 }
 
