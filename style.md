@@ -20,10 +20,10 @@ Do not use Hungarian notation (`b8 bIsDirty`) or prefixes (`m_member`, `kConstan
 * Public Interface      - foo.hpp
 * Inline impl           - foo.hpp
 * Private impl          - foo.cpp
-* Tests                 - foo.cpp
+* Tests                 - foo.test.hpp
 * Platform inline impl  - foo.win32.hpp
 * Platform private impl - foo.win32.cpp
-* Platform tests        - foo.win32.cpp
+* Platform tests        - foo.test.win32.hpp
 
 ## Intent
 Keep the number of files reasonably low. Having many small files is bad for build performance. It's also bad for humans navigating and discovering code.

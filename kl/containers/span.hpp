@@ -1,8 +1,8 @@
 #pragma once
 
-#include "kl/core/debug.hpp"
 #include "kl/core/move.hpp"
 #include "kl/core/traits.hpp"
+#include "kl/debug/assert.hpp"
 
 // -------------------------------------------------------------------------------------------------
 // Interface
@@ -35,17 +35,6 @@ namespace kl
 		constexpr const T* begin () const;
 		constexpr T*       end   ();
 		constexpr const T* end   () const;
-
-		//constexpr T&       first   ();
-		//constexpr const T& first   () const;
-		//constexpr T&       firstOr (T& x);
-		//constexpr const T& firstOr (T&&) const = delete;
-		//constexpr const T& firstOr (const T& x) const;
-		//constexpr T&       last    ();
-		//constexpr const T& last    () const;
-		//constexpr T&       lastOr  (T& x);
-		//constexpr const T& lastOr  (T&&) const = delete;
-		//constexpr const T& lastOr  (const T& x) const;
 
 		constexpr Span<T> resize      (i64 frontDelta, i64 backDelta) const;
 		constexpr Span<T> resizeFront (i64 frontDelta) const;
@@ -83,12 +72,6 @@ namespace kl
 
 namespace kl
 {
-	//template <typename T>
-	//Span(const T&) -> Span<const T>;
-
-	//template <typename T>
-	//Span(const T (&)[]) -> Span<const T>;
-
 	template <typename T>
 	constexpr
 	Span<T>::Span(T& x)
@@ -167,68 +150,6 @@ namespace kl
 	{
 		return &data[len];
 	}
-
-	#if false
-	template <typename T>
-	constexpr T&
-	Span<T>::first()
-	{
-		assert(len > 0);
-		return data[0];
-	}
-
-	template <typename T>
-	constexpr const T&
-	Span<T>::first() const
-	{
-		assert(len > 0);
-		return data[0];
-	}
-
-	template <typename T>
-	constexpr T&
-	Span<T>::firstOr(T& x)
-	{
-		return len > 0 ? data[0] : x;
-	}
-
-	template <typename T>
-	constexpr const T&
-	Span<T>::firstOr (const T& x) const
-	{
-		return len > 0 ? data[0] : x;
-	}
-
-	template <typename T>
-	constexpr T&
-	Span<T>::last()
-	{
-		assert(len > 0);
-		return data[len - 1];
-	}
-
-	template <typename T>
-	constexpr const T&
-	Span<T>::last() const
-	{
-		assert(len > 0);
-		return data[len - 1];
-	}
-
-	template <typename T>
-	constexpr T&
-	Span<T>::lastOr(T& x)
-	{
-		return len > 0 ? data[len - 1] : x;
-	}
-
-	template <typename T>
-	constexpr const T&
-	Span<T>::lastOr(const T& x) const
-	{
-		return len > 0 ? data[len - 1] : x;
-	}
-	#endif
 
 	template <typename T>
 	constexpr Span<T>

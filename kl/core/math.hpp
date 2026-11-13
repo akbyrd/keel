@@ -1,8 +1,8 @@
 #pragma once
 
 #include "kl/core/bits.hpp"
-#include "kl/core/debug.hpp"
 #include "kl/core/traits.hpp"
+#include "kl/debug/assert.hpp"
 
 // -------------------------------------------------------------------------------------------------
 // Interface

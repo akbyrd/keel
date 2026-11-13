@@ -7,8 +7,17 @@
     <Filter Include="Core">
       <UniqueIdentifier>{8f9881ef-4eab-4157-b9c2-035436a3f8c8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Debug">
+      <UniqueIdentifier>{6e1d8b3a-24c7-4f95-a0d2-7b3c9e5f1a48}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Memory">
       <UniqueIdentifier>{ce0061dc-8dc3-4dc5-a53a-50300281e9f7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Temp">
+      <UniqueIdentifier>{9a4f1c62-0e57-4b3d-8d21-6c7e5b9f2a13}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Test">
+      <UniqueIdentifier>{3d6b2a1e-7c41-4f0a-9b8e-5e2f6c1d4a70}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -35,6 +44,9 @@
     <ClInclude Include="..\..\kl\containers\span.hpp">
       <Filter>Containers</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\kl\containers\span.test.hpp">
+      <Filter>Containers</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\kl\containers\string-view.hpp">
       <Filter>Containers</Filter>
     </ClInclude>
@@ -57,18 +69,6 @@
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\kl\core\compiler.msvc.hpp">
-      <Filter>Core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\kl\core\debug.clang.hpp">
-      <Filter>Core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\kl\core\debug.gcc.hpp">
-      <Filter>Core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\kl\core\debug.hpp">
-      <Filter>Core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\kl\core\debug.msvc.hpp">
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\kl\core\hash.hpp">
@@ -119,6 +119,21 @@
     <ClInclude Include="..\..\kl\core\win32.hpp">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\kl\debug\assert.clang.hpp">
+      <Filter>Debug</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\kl\debug\assert.gcc.hpp">
+      <Filter>Debug</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\kl\debug\assert.hpp">
+      <Filter>Debug</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\kl\debug\assert.msvc.hpp">
+      <Filter>Debug</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\kl\debug\source-location.hpp">
+      <Filter>Debug</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\kl\memory\allocator.hpp">
       <Filter>Memory</Filter>
     </ClInclude>
@@ -128,10 +143,22 @@
     <ClInclude Include="..\..\kl\memory\lifetime.hpp">
       <Filter>Memory</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\kl\temp\print.hpp">
+      <Filter>Temp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\kl\test\test.hpp">
+      <Filter>Test</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\kl\memory\allocator.win32.cpp">
       <Filter>Memory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\kl\temp\print.cpp">
+      <Filter>Temp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\kl\test\test.cpp">
+      <Filter>Test</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

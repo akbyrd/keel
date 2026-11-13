@@ -22,6 +22,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\kl\containers\arena.hpp" />
     <ClInclude Include="..\..\kl\containers\span.hpp" />
+    <ClInclude Include="..\..\kl\containers\span.test.hpp" />
     <ClInclude Include="..\..\kl\containers\string-view.hpp" />
     <ClInclude Include="..\..\kl\core\bits.hpp" />
     <ClInclude Include="..\..\kl\core\bits.test.hpp" />
@@ -30,10 +31,6 @@
     <ClInclude Include="..\..\kl\core\compiler.gcc.hpp" />
     <ClInclude Include="..\..\kl\core\compiler.hpp" />
     <ClInclude Include="..\..\kl\core\compiler.msvc.hpp" />
-    <ClInclude Include="..\..\kl\core\debug.clang.hpp" />
-    <ClInclude Include="..\..\kl\core\debug.gcc.hpp" />
-    <ClInclude Include="..\..\kl\core\debug.hpp" />
-    <ClInclude Include="..\..\kl\core\debug.msvc.hpp" />
     <ClInclude Include="..\..\kl\core\hash.hpp" />
     <ClInclude Include="..\..\kl\core\isa.hpp" />
     <ClInclude Include="..\..\kl\core\isa.x64.hpp" />
@@ -50,12 +47,21 @@
     <ClInclude Include="..\..\kl\core\types.hpp" />
     <ClInclude Include="..\..\kl\core\types.test.hpp" />
     <ClInclude Include="..\..\kl\core\win32.hpp" />
+    <ClInclude Include="..\..\kl\debug\assert.clang.hpp" />
+    <ClInclude Include="..\..\kl\debug\assert.gcc.hpp" />
+    <ClInclude Include="..\..\kl\debug\assert.hpp" />
+    <ClInclude Include="..\..\kl\debug\assert.msvc.hpp" />
+    <ClInclude Include="..\..\kl\debug\source-location.hpp" />
     <ClInclude Include="..\..\kl\memory\allocator.hpp" />
     <ClInclude Include="..\..\kl\memory\bytes.hpp" />
     <ClInclude Include="..\..\kl\memory\lifetime.hpp" />
+    <ClInclude Include="..\..\kl\temp\print.hpp" />
+    <ClInclude Include="..\..\kl\test\test.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\kl\memory\allocator.win32.cpp" />
+    <ClCompile Include="..\..\kl\temp\print.cpp" />
+    <ClCompile Include="..\..\kl\test\test.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

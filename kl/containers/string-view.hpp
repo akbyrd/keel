@@ -1,8 +1,7 @@
 #pragma once
 
 #include "kl/containers/span.hpp"
-#include "kl/containers/span.hpp"
-//#include "kl/core/debug.hpp"
+#include "kl/debug/assert.hpp"
 
 // -------------------------------------------------------------------------------------------------
 // Interface

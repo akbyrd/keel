@@ -4,8 +4,8 @@
 
 #if KL_COMPILER_MSVC || KL_COMPILER_CLANG_CL
 
-#include "kl/core/debug.hpp"
 #include "kl/core/traits.hpp"
+#include "kl/debug/assert.hpp"
 
 namespace kl
 {

@@ -2,10 +2,10 @@
 
 #include "kl/core/compiler.hpp"
 
-#if KL_COMPILER_CLANG
+#if KL_COMPILER_GCC
 
-#include "kl/core/debug.hpp"
 #include "kl/core/traits.hpp"
+#include "kl/debug/assert.hpp"
 
 namespace kl
 {
@@ -17,8 +17,15 @@ namespace kl
 			// NOTE: The compiler assumes you can never continue past __builtin_trap. This could cause
 			// problems when debugging.
 
-			__builtin_debugtrap();
-			__builtin_trap();
+			if (isConstantEvaluated())
+			{
+				__builtin_trap();
+			}
+			else
+			{
+				asm ("int3; nop");
+				__builtin_trap();
+			}
 		}
 	}
 
@@ -31,7 +38,7 @@ namespace kl
 		}
 		else
 		{
-			__builtin_debugtrap();
+			asm ("int3; nop");
 		}
 	}
 }

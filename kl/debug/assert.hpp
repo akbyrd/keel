@@ -11,9 +11,9 @@ namespace kl
 	constexpr void debugBreak();
 }
 
-#include "kl/core/debug.clang.hpp" // IWYU pragma: export
-#include "kl/core/debug.gcc.hpp"   // IWYU pragma: export
-#include "kl/core/debug.msvc.hpp"  // IWYU pragma: export
+#include "kl/debug/assert.clang.hpp" // IWYU pragma: export
+#include "kl/debug/assert.gcc.hpp"   // IWYU pragma: export
+#include "kl/debug/assert.msvc.hpp"  // IWYU pragma: export
 
 // -------------------------------------------------------------------------------------------------
 // Implementation

@@ -123,6 +123,13 @@ namespace kl
 	template <typename T>                      constexpr b8 isTriviallyMoveConstructible    = __is_trivially_constructible(T, T);
 	template <typename T>                      constexpr b8 isTriviallyCopyable             = __is_trivially_copyable(T);
 	//template <typename T>                    constexpr b8 isTriviallyDestructible         = ...
+	template <typename T>                      constexpr i64 rank                           = 0;
+	template <typename T>                      constexpr i64 rank<T[]>                      = rank<T> + 1;
+	template <typename T, i64 N>               constexpr i64 rank<T[N]>                     = rank<T> + 1;
+	template <typename T, i64 D = 0>           constexpr i64 extent                         = 0;
+	template <typename T, i64 N>               constexpr i64 extent<T[N], 0>                = N;
+	template <typename T, i64 D>               constexpr i64 extent<T[], D>                 = extent<T, D - 1>;
+	template <typename T, i64 N, i64 D>        constexpr i64 extent<T[N], D>                = extent<T, D - 1>;
 
 	// TODO: Where should this live?
 	// TODO: Can replace is with `if consteval` if using C++ 23
@@ -167,8 +174,6 @@ namespace kl
 	//template <typename T> constexpr b8 hasVirtualDestructor           = __has_virtual_destructor(T);
 
 	//alignmentOf
-	//rank
-	//extent
 	//__builtin_addressof(_Val)
 	//__underlying_type(_Ty)
 }
