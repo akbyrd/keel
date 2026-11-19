@@ -12,6 +12,7 @@
 namespace kl
 {
 	// TODO: Think about the exact set of operations we want
+	// TODO: construct doesn't handle self moves correctly
 	template <typename T, typename... Args> constexpr void construct(T& dst, Args&& ...args);
 	template <typename T, typename... Args> constexpr void construct(Span<T> dst, Args&& ...args);
 	template <typename T> constexpr void defaultConstruct(T& dst);

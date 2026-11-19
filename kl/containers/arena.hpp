@@ -14,28 +14,30 @@ namespace kl
 	// TODO: Rename?
 	struct NoInit {};
 
-	struct Arena
+	class Arena final
 	{
+	private:
 		struct Meta;
 
-		Allocation alloc;
-		i64        used;
-		i64        reserved;
-		Meta*      lastMeta;
+		Allocation alloc    = {};
+		i64        used     = 0;
+		i64        reserved = 0;
+		Meta*      lastMeta = nullptr;
 
+		Arena(const Arena&) = default;
+		Arena& operator=(const Arena&) = delete;
+
+	public:
 		Arena() = default;
 		~Arena();
+
+		Arena(Arena&&);
+		Arena& operator=(Arena&&);
 
 		Arena(Span<const c8> name, Span<u8> bytes);
 		Arena(Span<const c8> name, Allocation&& alloc);
 		Arena(Span<const c8> name, i64 size, u8 align);
 		Arena(Span<const c8> name, i64 reserve, i64 commit, u8 align);
-
-		Arena(const Arena&) = delete;
-		Arena& operator=(const Arena&) = delete;
-
-		Arena(Arena&&);
-		Arena& operator=(Arena&&);
 
 		template <typename T>                   constexpr T&      push      ();
 		template <typename T>                   constexpr T&      push      (NoInit);
@@ -51,6 +53,8 @@ namespace kl
 
 		// TODO: scope
 		// TODO: overhead (arena, allocator, total)
+		// TODO: Should we support more than natural alignment?
+		// TODO: Doesn't support types with >4 byte alignment
 	};
 }
 
@@ -129,19 +133,20 @@ namespace kl
 
 	inline
 	Arena::Arena(Arena&& x)
-		: alloc(move(x.alloc))
-		, lastMeta(x.lastMeta)
+		: Arena(x)
 	{
-		x = {};
+		// NOTE: This requires Arena to be transparently replaceable
+		valueConstruct(x);
 	}
 
 	inline Arena&
 	Arena::operator=(Arena&& x)
 	{
-		alloc = move(x.alloc);
-		lastMeta = x.lastMeta;
-		x.alloc = {};
-		x.lastMeta = nullptr;
+		// TODO: Handle self move
+		assert(this != &x);
+
+		destruct(*this);
+		moveConstruct(*this, move(x));
 		return *this;
 	}
 
@@ -188,7 +193,9 @@ namespace kl
 		{
 			static_assert(TypeInfo<T>::align <= sizeof(Meta::offset));
 
-			if (!lastMeta || lastMeta->id.val != id<T>.val)
+			b8 sameType   = lastMeta && lastMeta->id.val == id<T>.val;
+			b8 contiguous = lastMeta && lastMeta->offset + lastMeta->count * lastMeta->size == used;
+			if (!(sameType && contiguous))
 			{
 				Span<Meta> metas = pushArray<Meta>(1, NoInit {});
 				u8* dst = alignUp(alloc.bytes.data + used, alignof(T));
@@ -230,6 +237,8 @@ namespace kl
 			}
 		}
 
+		used = required;
+
 		Span<T> x = { count, reinterpret_cast<T*>(dst) };
 		return x;
 	}
@@ -259,7 +268,7 @@ namespace kl
 		Span<T> x = pushArray<T>(count, NoInit {});
 		construct(x[0], forward<Args>(args)...);
 		for (i64 i = 1; i < count; ++i)
-			x[i] = x[0];
+			copyConstruct(x[i], x[0]);
 		return x;
 	}
 
